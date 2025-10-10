@@ -22,7 +22,7 @@ export class AcademicLevel extends Model<AcademicLevelAttributes, AcademicLevelC
 AcademicLevel.init( {
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true, allowNull: false },
   name: { type: DataTypes.STRING, allowNull: false },
-  orderIndex: { type: DataTypes.INTEGER, allowNull: false },
+  orderIndex: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
   createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
-}, { sequelize, modelName: 'AcademicLevel', timestamps: false } );
+}, { sequelize, modelName: 'AcademicLevel', timestamps: true } );

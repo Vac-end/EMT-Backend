@@ -28,9 +28,9 @@ export class Course extends Model<CourseAttributes, CourseCreationAttributes> im
 Course.init( {
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true, allowNull: false },
   tittle: { type: DataTypes.STRING, allowNull: false },
-  description: { type: DataTypes.STRING, allowNull: false },
-  coverImageUrl: { type: DataTypes.STRING, allowNull: false },
-  createdBy: { type: DataTypes.UUID, allowNull: true, references: { model: 'User', key: 'id' } },
+  description: { type: DataTypes.STRING, allowNull: true },
+  coverImageUrl: { type: DataTypes.STRING, allowNull: true },
+  createdBy: { type: DataTypes.UUID, allowNull: false, references: { model: 'User', key: 'id' } },
   academicLevelId: { type: DataTypes.UUID, allowNull: true, references: { model: 'AcademicLevel', key: 'id' } },
   createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
