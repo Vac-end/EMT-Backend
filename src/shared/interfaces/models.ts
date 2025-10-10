@@ -1,5 +1,5 @@
 import { Token } from '@features/auth/model/Token.model';
-import { sequelize } from '../config/db.config'
+import { sequelize } from '@config/db.config'
 import { User } from '@features/user/model/user.model';
 import { AcademicLevel } from '@features/AcademicLevel/model/academicLevel.model';
 import { Course } from '@features/course/model/course.model';
@@ -9,6 +9,11 @@ import { CourseContent } from '@features/courseContent/model/courseContent.model
 import { Enrollment } from '@features/Enrollment/model/enrollment.model';
 import { Attendance } from '@features/Attendance/model/attendance.model';
 import { Schedule } from '@features/Schedule/model/schedule.model';
+import { Question } from '@features/Question/model/question.model';
+import { QuestionOpt } from '@features/Question/model/questionOps.model';
+import { Quiz } from '@features/Quiz/model/quiz.model';
+import { Assignment } from '@features/Assignment/model/assignment.model';
+import { Submission } from '@features/Submission/model/submission.model';
 
 User.hasMany(Token, { foreignKey: 'userId', as: 'UserToken' });
 Token.belongsTo(User, { foreignKey: 'userId', as: 'TokenOwner' });
@@ -49,4 +54,19 @@ Schedule.belongsTo(Course, { foreignKey: 'courseId', as: 'ScheduleCourse' });
 Lesson.hasMany(Schedule, { foreignKey: 'lessonId', as: 'LessonSchedules' });
 Schedule.belongsTo(Lesson, { foreignKey: 'lessonId', as: 'ScheduleLesson' });
 
-export { sequelize, User, Token, AcademicLevel, Course, Module, Lesson, CourseContent, Enrollment, Attendance, Schedule}
+Quiz.hasMany(Question, { foreignKey: 'quizId', as: 'QuizQuestions' });
+Question.belongsTo(Quiz, { foreignKey: 'quizId', as: 'QuestionQuiz' });
+
+Question.hasMany(QuestionOpt, { foreignKey: 'questionId', as: 'QuestionOptions' });
+QuestionOpt.belongsTo(Question, { foreignKey: 'questionId', as: 'OptionQuestion' });
+
+Lesson.hasMany(Assignment, { foreignKey: 'lessonId', as: 'LessonAssignments' });
+Assignment.belongsTo(Lesson, { foreignKey: 'lessonId', as: 'AssignmentLesson' });
+
+Enrollment.hasMany(Submission, { foreignKey: 'enrollmentId', as: 'EnrollmentSubmissions' });
+Submission.belongsTo(Enrollment, { foreignKey: 'enrollmentId', as: 'SubmissionEnrollment' });
+
+Lesson.hasMany(Submission, { foreignKey: 'lessonId', as: 'submissions' });
+Submission.belongsTo(Lesson, { foreignKey: 'lessonId', as: 'lesson' });
+
+export { sequelize, User, Token, AcademicLevel, Course, Module, Lesson, CourseContent, Enrollment, Attendance, Schedule, Quiz, Question, QuestionOpt, Assignment, Submission}
