@@ -72,8 +72,8 @@ export const authController = {
         return res.status( 400 ).json( { message: 'Validation failed', errors: errors.array() } );
       }
 
-      const { refreshToken } = req.body;
-      const accessToken = await authService.refresh( refreshToken );
+      const { token } = req.body;
+      const accessToken = await authService.refresh( token );
       return res.status( 200 ).json( { accessToken } );
     } catch ( error: any ) {
       handleServiceError( error, 'Refresh' );

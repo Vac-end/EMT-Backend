@@ -2,12 +2,11 @@ import { handleServiceError } from '@utils/helpers';
 import { Request, Response } from 'express';
 import { userService } from './user.service';
 
-
 export const userController = {
   getAll: async ( _req: Request, res: Response ) => {
     try {
-      const users = await userService.getAll();
-      return res.status( 200 ).json( users );
+      const Users = await userService.getAll();
+      return res.status( 200 ).json( Users );
     } catch ( error ) {
       handleServiceError( error, 'Get All Users' );
       return res.status( 500 ).json( { message: 'Failed to fetch users' } );
@@ -23,6 +22,15 @@ export const userController = {
     } catch ( error ) {
       handleServiceError( error, 'Get User by ID' );
       return res.status( 500 ).json( { message: 'Failed to fetch user' } );
+    }
+  },
+  getByRole: async ( req: Request, res: Response ) => {
+    try {
+      const users = await userService.getByRole( req.params.role as 'estudiante' | 'docente' | 'administrador' );
+      return res.status( 200 ).json( users );
+    } catch ( error ) {
+      handleServiceError( error, 'Get Users by Role' );
+      return res.status( 500 ).json( { message: 'Failed to fetch users by role' } );
     }
   },
   create: async ( req: Request, res: Response ) => {
@@ -55,15 +63,6 @@ export const userController = {
     } catch ( error ) {
       handleServiceError( error, 'Delete User' );
       return res.status( 500 ).json( { message: 'Failed to delete user' } );
-    }
-  },
-  getByRole: async ( req: Request, res: Response ) => {
-    try {
-      const users = await userService.getByRole( req.params.role as 'estudiante' | 'docente' | 'administrador' );
-      return res.status( 200 ).json( users );
-    } catch ( error ) {
-      handleServiceError( error, 'Get Users by Role' );
-      return res.status( 500 ).json( { message: 'Failed to fetch users by role' } );
     }
   },
 };

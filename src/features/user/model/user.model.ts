@@ -9,6 +9,7 @@ export interface UserAttributes {
   name?: string;
   academicLevelId?: string;
   otpRequired?: boolean;
+  imagePerfilUrl?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -23,6 +24,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   declare name?: string;
   declare academicLevelId?: string;
   declare otpRequired?: boolean;
+  declare imagePerfilUrl?: string;
   declare resetPasswordToken?: string | null;
   declare resetPasswordExpires?: Date | null;
   declare readonly createdAt: Date;
@@ -38,6 +40,7 @@ User.init(
     name: { type: DataTypes.STRING, allowNull: false },
     academicLevelId: { type: DataTypes.UUID, allowNull: true, references: { model: 'AcademicLevel', key: 'id' } },
     otpRequired: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
+    imagePerfilUrl: { type: DataTypes.STRING, allowNull: false, defaultValue:'/Multimedia/Imagenes/Usuarios/Perfiles/defaultProfile.webp' },
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   },
