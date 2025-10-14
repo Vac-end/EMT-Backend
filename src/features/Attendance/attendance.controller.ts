@@ -103,28 +103,28 @@ export const AttendanceController = {
     }
   },
 
-  update: async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const { ids, filter, ...data } = req.body;
-    validateUpdateOptions(id, ids, filter);
-    validateAttendancePayload(data);
-    const updateOptions: { ids?: string[]; filter?: WhereOptions } = {};
-    if (ids) updateOptions.ids = ids;
-    if (filter) updateOptions.filter = filter;
-    const updatedAttendances = await attendanceService.update(id, data, updateOptions);
-    return res.status(200).json({
-      message: id
-        ? 'Asistencia actualizada exitosamente'
-        : 'Asistencias actualizadas exitosamente',
-      data: id ? updatedAttendances[0] || null : updatedAttendances,
-      count: updatedAttendances.length,
-    });
-  } catch (error) {
-    handleServiceError(error, 'Update Attendance');
-    return res.status(400).json({ message: 'Failed to update Attendance' });
-  }
-},
+  update: async ( req: Request, res: Response ) => {
+    try {
+      const { id } = req.params;
+      const { ids, filter, ...data } = req.body;
+      validateUpdateOptions( id, ids, filter );
+      validateAttendancePayload( data );
+      const updateOptions: { ids?: string[]; filter?: WhereOptions; } = {};
+      if ( ids ) updateOptions.ids = ids;
+      if ( filter ) updateOptions.filter = filter;
+      const updatedAttendances = await attendanceService.update( id, data, updateOptions );
+      return res.status( 200 ).json( {
+        message: id
+          ? 'Asistencia actualizada exitosamente'
+          : 'Asistencias actualizadas exitosamente',
+        data: id ? updatedAttendances[ 0 ] || null : updatedAttendances,
+        count: updatedAttendances.length,
+      } );
+    } catch ( error ) {
+      handleServiceError( error, 'Update Attendance' );
+      return res.status( 400 ).json( { message: 'Failed to update Attendance' } );
+    }
+  },
 
   delete: async ( req: Request, res: Response ) => {
     try {

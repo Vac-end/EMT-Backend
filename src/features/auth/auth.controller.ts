@@ -36,7 +36,7 @@ export const authController = {
         return res.status( 400 ).json( { message: 'Validation failed', errors: errors.array() } );
       }
 
-      const { id: userId } = req.user as { id: string; };
+      const { userId } = req.body;
       const { secret, otpAuthUrl, message } = await authService.enableTwoFactorAuth( userId );
       return res.status( 200 ).json( { secret, otpAuthUrl, message } );
     } catch ( error: any ) {
