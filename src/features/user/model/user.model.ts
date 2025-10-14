@@ -39,7 +39,7 @@ User.init(
     role: { type: DataTypes.ENUM( 'estudiante', 'docente', 'administrador' ), allowNull: false, defaultValue: 'estudiante' },
     name: { type: DataTypes.STRING, allowNull: false },
     academicLevelId: { type: DataTypes.UUID, allowNull: true, references: { model: 'AcademicLevel', key: 'id' } },
-    otpRequired: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
+    otpRequired: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
     imagePerfilUrl: { type: DataTypes.STRING, allowNull: false, defaultValue:'/Multimedia/Imagenes/Usuarios/Perfiles/defaultProfile.webp' },
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },

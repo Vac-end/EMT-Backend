@@ -52,7 +52,7 @@ export const authController = {
         return res.status( 400 ).json( { message: 'Validation failed', errors: errors.array() } );
       }
 
-      const { id: adminId, role } = req.user as { id: string; role: string; };
+      const { adminId, role } = req.body;
       if ( role !== 'administrador' ) {
         return res.status( 403 ).json( { message: 'Admin access required' } );
       }
@@ -136,7 +136,7 @@ export const authController = {
         return res.status( 400 ).json( { message: 'Validation failed', errors: errors.array() } );
       }
 
-      const { id: userId } = req.user as { id: string; };
+      const { userId } = req.body;
       const { isEnabled } = await authService.isTwoFactorEnabled( userId );
       return res.status( 200 ).json( { isTwoFactorEnabled: isEnabled } );
     } catch ( error: any ) {

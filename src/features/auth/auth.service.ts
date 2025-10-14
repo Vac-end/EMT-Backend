@@ -27,14 +27,13 @@ export const authService = {
         throw new Error( 'Invalid credentials' );
       }
 
-      if ( user.otpRequired && !otp ) {
-        return { requiresOtp: true, userId: user.id, role: user.role };
-      }
-
-      if ( user.otpRequired && otp ) {
+      if ( user.otpRequired ) {
+        if ( !otp ) {
+          return { requiresOtp: true, userId: user.id, role: user.role };
+        }
         const twoFactor = await authRepository.findByUser( user.id );
         const otpToken = twoFactor.find( ( t ) => t.type === 'Otp' );
-        if ( !otpToken ) {
+        if ( !otpToken || !otpToken.token ) {
           throw new Error( '2FA is enabled but no OTP secret found' );
         }
         const isValid = authenticator.check( otp, otpToken.token );
@@ -42,7 +41,7 @@ export const authService = {
           throw new Error( 'Invalid OTP' );
         }
       }
-
+      
       const accessToken = jwt.sign( { id: user.id, role: user.role }, envConfig.PRIVATE_KEY, { expiresIn: '15m' } );
       const refreshToken = jwt.sign( { id: user.id }, envConfig.PRIVATE_KEY, { expiresIn: '7d' } );
       await authRepository.create( {
@@ -118,7 +117,7 @@ export const authService = {
   refresh: async ( token: string ) => {
     try {
       const refreshToken = await authRepository.findByToken( token );
-      if ( !refreshToken || (refreshToken.expires && refreshToken.expires < new Date()) || refreshToken.type !== 'refreshToken' ) {
+      if ( !refreshToken || ( refreshToken.expires && refreshToken.expires < new Date() ) || refreshToken.type !== 'refreshToken' ) {
         throw new Error( 'Invalid or expired refresh token' );
       }
       const decoded = jwt.verify( token, envConfig.PRIVATE_KEY ) as { id: string; };
@@ -171,7 +170,7 @@ export const authService = {
   resetPassword: async ( token: string, newPassword: string ) => {
     try {
       const recoveryToken = await authRepository.findByToken( token );
-      if ( !recoveryToken || (recoveryToken.expires && recoveryToken.expires < new Date()) || recoveryToken.type !== 'recoveryToken' ) {
+      if ( !recoveryToken || ( recoveryToken.expires && recoveryToken.expires < new Date() ) || recoveryToken.type !== 'recoveryToken' ) {
         throw new Error( 'Invalid or expired recovery code' );
       }
       const user = await userRepository.findById( recoveryToken.userId );

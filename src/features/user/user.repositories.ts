@@ -20,7 +20,7 @@ export const userRepository = {
   findByEmailWithPassword: (email: string) =>
     User.findOne({
       where: { email },
-      attributes: ['id', 'email', 'password', 'role'],
+      attributes: ['id', 'email', 'password', 'role', 'otpRequired'],
     }),
 
   findByRole: (role: 'estudiante' | 'docente' | 'administrador') =>
