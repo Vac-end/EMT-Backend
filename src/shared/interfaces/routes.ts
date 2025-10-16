@@ -24,7 +24,7 @@ router.use('/courses', courseRoutes);
 router.use('/modules', moduleRoutes);
 router.use('/lessons', lessonRoutes);
 router.use('/courseContents', courseContentRoutes);
-router.use('/enrollment', enrollmentRoutes);
+router.use('/enrollments', enrollmentRoutes);
 router.use('/attendances', attendanceRoutes)
 router.use('/schedules', scheduleRoutes);
 router.use('/quizs', quizRoutes);

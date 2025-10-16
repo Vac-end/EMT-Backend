@@ -1,7 +1,21 @@
 import { JwtPayload } from 'jsonwebtoken';
 
-declare module 'express' {
-  interface Request {
-    user?: JwtPayload | { id: string; role: string; iat: number; exp: number };
+export interface CustomJwtPayload extends JwtPayload {
+  id: string;
+  role: 'estudiante' | 'docente' | 'administrador';
+  academicLevelId?: string | null;
+  email: string;
+  name: string;
+  iat?: number;
+  exp?: number;
+}
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: CustomJwtPayload;
+    }
   }
 }
+
+export {};

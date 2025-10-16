@@ -10,7 +10,6 @@ export const envConfig = {
   EMAIL_USER: process.env.EMAIL_USER || '',
   EMAIL_PASS: process.env.EMAIL_PASS || '',
   FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:4200',
-  FRONTEND_RESET_URL: process.env.FRONTEND_RESET_URL || 'http://localhost:4200',
   CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:4200',
   NODE_ENV: process.env.NODE_ENV || 'development',
   ACCESS_KEY: process.env.ACCESS_KEY || '',

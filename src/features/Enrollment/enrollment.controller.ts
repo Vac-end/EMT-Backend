@@ -52,6 +52,18 @@ export const EnrollmentController = {
     }
   },
 
+  getCoursesByUserId: async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.params;
+      if (!userId) return res.status(400).json({ message: 'User ID is required' });
+      const courses = await EnrollmentService.getCoursesByUserId(userId);
+      return res.status(200).json(courses);
+    } catch (error) {
+      handleServiceError(error, 'Get Courses by User ID');
+      return res.status(500).json({ message: 'Failed to fetch courses' });
+    }
+  },
+  
   getByRole: async ( req: Request, res: Response ) => {
     try {
       const enrollments = await EnrollmentService.getByRole( req.params.role as 'estudiante' | 'docente' | 'soporte' );

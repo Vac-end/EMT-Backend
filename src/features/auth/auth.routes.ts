@@ -13,6 +13,7 @@ router.post( '/disable-two-factor', authMiddleware, validate( enableDisableTwoFa
 router.post( '/recover-password', validate( recoverPasswordSchema ), authController.recoverPassword );
 router.post( '/reset-password', validate( resetPasswordSchema ), authController.resetPassword );
 router.post( '/refresh', authController.refresh );
+router.post( '/logout', authController.logout );
 router.post( '/is-two-factor-enabled', authMiddleware, roleMiddleware( [ 'docente', 'administrador' ] ), authController.checkTwoFactorStatus );
 
 export default router;

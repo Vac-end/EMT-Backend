@@ -1,3 +1,5 @@
+import { Request, Response } from 'express';
+import { validationResult } from 'express-validator';
 import z from 'zod';
 
 export const loginSchema = z.object( {
@@ -18,3 +20,12 @@ export const enableDisableTwoFactorSchema = z.object( {
 export const recoverPasswordSchema = z.object( {
   email: z.string().email(),
 } );
+
+export const handleValidation = (req: Request, res: Response) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ message: 'Validation failed', errors: errors.array() });
+    return true;
+  }
+  return false;
+};

@@ -15,6 +15,21 @@ const generateShortCode = () => {
   return code;
 };
 
+const generateAccessToken = (user: any) => {
+  const payload = {
+    sub: user.id,
+    email: user.email,
+    role: user.role,
+    academicLevelId: user.role === 'student' ? user.academicLevelId : null,
+  };
+  return jwt.sign(payload, envConfig.PRIVATE_KEY, { expiresIn: '15m' });
+};
+
+const generateRefreshToken = (user: any) => {
+  const payload = { sub: user.id };
+  return jwt.sign(payload, envConfig.PRIVATE_KEY, { expiresIn: '7d' });
+};
+
 export const authService = {
 
   login: async ( email: string, password: string, otp?: string ) => {
@@ -42,15 +57,19 @@ export const authService = {
         }
       }
       
-      const accessToken = jwt.sign( { id: user.id, role: user.role }, envConfig.PRIVATE_KEY, { expiresIn: '15m' } );
-      const refreshToken = jwt.sign( { id: user.id }, envConfig.PRIVATE_KEY, { expiresIn: '7d' } );
+      const accessToken = generateAccessToken(user);
+      const refreshToken = generateRefreshToken(user);
       await authRepository.create( {
         token: refreshToken,
         userId: user.id,
         expires: new Date( Date.now() + 7 * 24 * 60 * 60 * 1000 ),
         type: 'refreshToken',
       } );
-      return { accessToken, refreshToken, role: user.role, id: user.id };
+      return {
+        accessToken,
+        refreshToken,
+        user: { id: user.id, role: user.role, email: user.email, name: user.name, academicLevelId: user.role === 'estudiante' ? user.academicLevelId : null},
+      };
     } catch ( error ) {
       handleServiceError( error, 'Login' );
       throw error;
@@ -120,12 +139,12 @@ export const authService = {
       if ( !refreshToken || ( refreshToken.expires && refreshToken.expires < new Date() ) || refreshToken.type !== 'refreshToken' ) {
         throw new Error( 'Invalid or expired refresh token' );
       }
-      const decoded = jwt.verify( token, envConfig.PRIVATE_KEY ) as { id: string; };
-      const user = await userRepository.findById( decoded.id );
+      const decoded = jwt.verify( token, envConfig.PRIVATE_KEY ) as { sub: string; };
+      const user = await userRepository.findById( decoded.sub );
       if ( !user ) {
         throw new Error( 'User not found' );
       }
-      return jwt.sign( { id: user.id, role: user.role }, envConfig.PRIVATE_KEY, { expiresIn: '15m' } );
+      return generateAccessToken(user);
     } catch ( error ) {
       handleServiceError( error, 'Refresh Token' );
       throw error;

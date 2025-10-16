@@ -14,18 +14,18 @@ const app: Application = express();
 
 // Middlewares globales
 app.use(helmet());
-app.use(cookieParser())
-app.use(cors({ origin: envConfig.CORS_ORIGIN, credentials: true }));
+app.use(morgan('combined', { stream: { write: (message) => logger.info(message.trim()) } }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(morgan('combined', { stream: { write: (message) => logger.info(message.trim()) } }));
+app.use(cookieParser())
+app.use(cors({ origin: envConfig.CORS_ORIGIN, credentials: true }));
 
 app.get('/health', (_req: Request, res: Response) => {
   res.status(200).json({ status: 'OK', message: 'Server is running', timestamp: new Date().toISOString() });
 });
 
-app.use(rateLimitMiddleware)
 app.use('/api', routes);
+app.use(rateLimitMiddleware)
 app.use(notFoundHandler);
 app.use(errorHandler);
 

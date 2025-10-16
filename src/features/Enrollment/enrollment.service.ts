@@ -1,6 +1,7 @@
 import { handleServiceError } from '@utils/helpers';
 import { enrollmentRepository } from './enrollment.repositories';
 import { Enrollment, EnrollmentCreationAttributes } from './model/enrollment.model';
+import { Course } from '@interfaces/models';
 
 export const EnrollmentService = {
   getAll: async () => {
@@ -39,6 +40,23 @@ export const EnrollmentService = {
       return Enrollment;
     } catch ( error ) {
       handleServiceError( error, "Get By Course Id Enrollment" );
+      throw error;
+    }
+  },
+
+  getCoursesByUserId: async (userId: string) => {
+    try {
+      const enrollments = await enrollmentRepository.findByUserId(userId);
+      if (!enrollments || enrollments.length === 0) {
+        return [];
+      }
+      const courseIds = enrollments
+        .filter(enrollment => enrollment.role === 'docente')
+        .map(enrollment => enrollment.courseId);
+      const courses = await Course.findAll({ where: { id: courseIds } });
+      return courses;
+    } catch (error) {
+      handleServiceError(error, "Get Courses by User ID");
       throw error;
     }
   },
