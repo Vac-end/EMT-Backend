@@ -51,7 +51,7 @@ export const EnrollmentService = {
         return [];
       }
       const courseIds = enrollments
-        .filter(enrollment => enrollment.role === 'docente')
+        .filter(enrollment => enrollment.role === 'docente' || enrollment.role === 'estudiante')
         .map(enrollment => enrollment.courseId);
       const courses = await Course.findAll({ where: { id: courseIds } });
       return courses;

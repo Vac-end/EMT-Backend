@@ -12,7 +12,7 @@ router.get( '/:id', authMiddleware, EnrollmentController.getById );
 router.get( '/user/:userId', authMiddleware, EnrollmentController.getByUserId );
 router.get( '/course/:courseId', authMiddleware, EnrollmentController.getByCourseId );
 router.get( '/role/:role', authMiddleware, EnrollmentController.getByRole );
-router.get('/user/:userId/courses', authMiddleware, roleMiddleware(['docente']), EnrollmentController.getCoursesByUserId);
+router.get('/user/:userId/courses', authMiddleware, EnrollmentController.getCoursesByUserId);
 router.post( '/', authMiddleware, roleMiddleware( [ 'docente', 'administrador' ] ), validate( EnrollmentSchema ), EnrollmentController.create );
 router.put( '/:id', authMiddleware, roleMiddleware( [ 'docente', 'administrador' ] ), validate( EnrollmentSchema.partial() ), EnrollmentController.update );
 router.delete( '/:id', authMiddleware, roleMiddleware( [ 'docente', 'administrador' ] ), EnrollmentController.delete );

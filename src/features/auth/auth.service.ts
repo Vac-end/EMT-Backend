@@ -20,7 +20,8 @@ const generateAccessToken = (user: any) => {
     sub: user.id,
     email: user.email,
     role: user.role,
-    academicLevelId: user.role === 'student' ? user.academicLevelId : null,
+    // use the Spanish role value saved in DB; fallback to null if missing
+    academicLevelId: user.role === 'estudiante' ? (user.academicLevelId ?? null) : null,
   };
   return jwt.sign(payload, envConfig.PRIVATE_KEY, { expiresIn: '15m' });
 };
