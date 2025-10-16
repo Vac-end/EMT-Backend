@@ -41,7 +41,7 @@ export const CourseController = {
 
   getByAcademicLevelId: async ( req: Request, res: Response ) => {
     try {
-      const { academiclevelId } = req.body;
+      const { academiclevelId } = req.params;
       if ( !academiclevelId ) return res.status( 400 ).json( { message: 'AcademicLevel ID is required' } );
       const Course = await courseService.getByAcademicLevelId( academiclevelId );
       if ( !Course ) return res.status( 404 ).json( { message: 'Course not found' } );

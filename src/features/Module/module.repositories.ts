@@ -13,7 +13,7 @@ export const moduleRepository = {
     Module.create( data ),
 
   update: ( id: string, data: Partial<ModuleCreationAttributes> ) =>
-    Module.update( data, { where: { id }, returning: true, } ),
+    Module.update( data, { where: { id }, returning: true } ),
 
   delete: ( id: string ) =>
     Module.destroy( { where: { id } } ),

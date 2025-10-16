@@ -8,11 +8,13 @@ import routes from './shared/interfaces/routes';
 import { errorHandler } from './shared/middlewares/error.middleware';
 import { notFoundHandler } from './shared/middlewares/notFound.middleware';
 import { rateLimitMiddleware } from '@middlewares/rateLimit.middleware';
+import cookieParser from 'cookie-parser';
 
 const app: Application = express();
 
 // Middlewares globales
 app.use(helmet());
+app.use(cookieParser())
 app.use(cors({ origin: envConfig.CORS_ORIGIN, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

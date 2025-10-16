@@ -10,7 +10,7 @@ const router = Router();
 router.get( '/', authMiddleware, roleMiddleware( [ 'administrador' ] ), CourseController.getAll );
 router.get( '/:id', authMiddleware, CourseController.getById );
 router.get( '/CreatedBy/:createdBy', authMiddleware, CourseController.getByCreatedId );
-router.get( '/byAcademicLevel', authMiddleware, CourseController.getByAcademicLevelId );
+router.get( '/byAcademicLevel/:academiclevelId', authMiddleware, CourseController.getByAcademicLevelId );
 router.post( '/', authMiddleware, roleMiddleware( [ 'administrador' ] ), validate( courseSchema ), CourseController.create );
 router.put( '/:id', authMiddleware, roleMiddleware( [ 'administrador' ] ), validate( courseSchema.partial() ), CourseController.update );
 router.delete( '/:id', authMiddleware, roleMiddleware( [ 'administrador' ] ), CourseController.delete );

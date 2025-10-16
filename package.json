@@ -24,6 +24,7 @@
   "type": "commonjs",
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",
     "@types/csurf": "^1.11.5",
     "@types/express": "^5.0.3",
@@ -52,6 +53,7 @@
     "@aws-sdk/client-s3": "^3.907.0",
     "@aws-sdk/s3-request-presigner": "^3.907.0",
     "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dompurify": "^3.2.7",
     "dotenv": "17.2.3",
