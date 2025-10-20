@@ -1,6 +1,6 @@
 import { handleServiceError } from '@utils/helpers';
 import { courseRepository } from './course.repositories';
-import { CourseCreationAttributes } from './model/course.model';
+import { CourseCreationAttributes } from '@interfaces/models';
 
 export const courseService = {
   getAll: async () => {
@@ -19,6 +19,42 @@ export const courseService = {
       return Courses;
     } catch ( error ) {
       handleServiceError( error, "Get By Id Courses" );
+      throw error;
+    }
+  },
+
+  getAdminDashboard: async ( page: number, limit: number ) => {
+    try {
+      const offset = ( page - 1 ) * limit;
+      const { count, rows } = await courseRepository.findAdminDashboardCourses( limit, offset );
+      const dashboardCourses = rows.map( course => {
+        const courseData: any = course.get( { plain: true } );
+        const allEnrollments = courseData.CourseEnrolledUsers || [];
+        const teacherEnrollment = allEnrollments.find( ( e: any ) => e.role === 'docente' );
+        const teacherName = teacherEnrollment?.EnrolledUser?.name ?? 'No asignado';
+        const studentCount = allEnrollments.filter( ( e: any ) => e.role === 'estudiante' ).length;
+        const academicLevelName = courseData.CourseAcademicLevel?.name ?? 'General';
+        return {
+          enrollmentId: null,
+          course: {
+            id: courseData.id,
+            tittle: courseData.tittle,
+            coverImageUrl: courseData.coverImageUrl,
+            academicLevelName: academicLevelName
+          },
+          resolvedAcademicLevel: academicLevelName,
+          resolvedTeacher: teacherName,
+          resolvedEnrollmentCount: studentCount,
+        };
+      } );
+      return {
+        totalItems: count,
+        courses: dashboardCourses,
+        totalPages: Math.ceil( count / limit ),
+        currentPage: page,
+      };
+    } catch ( error ) {
+      handleServiceError( error, "Get Admin Dashboard Courses" );
       throw error;
     }
   },

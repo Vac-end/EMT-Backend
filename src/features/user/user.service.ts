@@ -1,6 +1,6 @@
 import { handleServiceError } from '@utils/helpers';
 import { userRepository } from './user.repositories';
-import { UserCreationAttributes } from './model/user.model';
+import { UserCreationAttributes } from '@interfaces/models';
 import bcrypt from 'bcrypt';
 
 export const userService = {

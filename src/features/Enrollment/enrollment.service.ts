@@ -1,7 +1,6 @@
 import { handleServiceError } from '@utils/helpers';
 import { enrollmentRepository } from './enrollment.repositories';
-import { Enrollment, EnrollmentCreationAttributes } from './model/enrollment.model';
-import { Course } from '@interfaces/models';
+import { Enrollment, EnrollmentCreationAttributes, Course } from '@interfaces/models';
 
 export const EnrollmentService = {
   getAll: async () => {
@@ -34,6 +33,78 @@ export const EnrollmentService = {
     }
   },
 
+  getStudentDashboard: async ( userId: string, page: number, limit: number ) => {
+    try {
+      const offset = ( page - 1 ) * limit;
+      const { count, rows } = await enrollmentRepository.findStudentDashboardCourses( userId, limit, offset );
+      const dashboardCourses = rows.map( enrollment => {
+        const course: any = ( enrollment as any ).EnrolledCourse;
+        if ( !course ) return null;
+        const allCourseEnrollments = course.CourseEnrolledUsers || [];
+        const teacherEnrollment = allCourseEnrollments.find( ( e: any ) => e.role === 'docente' );
+        const teacherName = teacherEnrollment?.EnrolledUser?.name ?? 'No asignado';
+        const studentCount = allCourseEnrollments.filter( ( e: any ) => e.role === 'estudiante' ).length;
+        const academicLevelName = course.CourseAcademicLevel?.name ?? 'General';
+        return {
+          enrollmentId: enrollment.id,
+          course: {
+            id: course.id,
+            tittle: course.tittle,
+            coverImageUrl: course.coverImageUrl,
+            academicLevelName: academicLevelName,
+          },
+          resolvedTeacher: teacherName,
+          resolvedEnrollmentCount: studentCount,
+        };
+      } );
+      return {
+        totalItems: count,
+        courses: dashboardCourses,
+        totalPages: Math.ceil( count / limit ),
+        currentPage: page,
+      };
+    } catch ( error ) {
+      handleServiceError( error, "Get Student Dashboard Courses" );
+      throw error;
+    }
+  },
+
+  getTeacherDashboard: async ( userId: string, page: number, limit: number ) => {
+    try {
+      const offset = ( page - 1 ) * limit;
+      const { count, rows } = await enrollmentRepository.findTeacherDashboardCourses( userId, limit, offset );
+      const dashboardCourses = rows.map( enrollment => {
+        const enrollmentData: any = enrollment;
+        const course: any = enrollmentData.EnrolledCourse;
+        if ( !course ) return null;
+        const allCourseEnrollments = course.CourseEnrolledUsers || [];
+        const studentCount = allCourseEnrollments.filter( ( e: any ) => e.role === 'estudiante' ).length;
+        const academicLevelName = course.CourseAcademicLevel?.name ?? 'General';
+        const teacherName = enrollmentData.EnrolledUser?.name ?? 'Profesor';
+        return {
+          enrollmentId: enrollmentData.id,
+          course: {
+            id: course.id,
+            tittle: course.tittle,
+            coverImageUrl: course.coverImageUrl,
+            academicLevelName: academicLevelName
+          },
+          resolvedTeacher: teacherName,
+          resolvedEnrollmentCount: studentCount,
+        };
+      } );
+      return {
+        totalItems: count,
+        courses: dashboardCourses,
+        totalPages: Math.ceil( count / limit ),
+        currentPage: page,
+      };
+    } catch ( error ) {
+      handleServiceError( error, "Get Teacher Dashboard Courses" );
+      throw error;
+    }
+  },
+
   getByCourseId: async ( courseId: string ) => {
     try {
       const Enrollment = await enrollmentRepository.findByCourseId( courseId );
@@ -44,19 +115,19 @@ export const EnrollmentService = {
     }
   },
 
-  getCoursesByUserId: async (userId: string) => {
+  getCoursesByUserId: async ( userId: string ) => {
     try {
-      const enrollments = await enrollmentRepository.findByUserId(userId);
-      if (!enrollments || enrollments.length === 0) {
+      const enrollments = await enrollmentRepository.findByUserId( userId );
+      if ( !enrollments || enrollments.length === 0 ) {
         return [];
       }
       const courseIds = enrollments
-        .filter(enrollment => enrollment.role === 'docente' || enrollment.role === 'estudiante')
-        .map(enrollment => enrollment.courseId);
-      const courses = await Course.findAll({ where: { id: courseIds } });
+        .filter( enrollment => enrollment.role === 'docente' || enrollment.role === 'estudiante' )
+        .map( enrollment => enrollment.courseId );
+      const courses = await Course.findAll( { where: { id: courseIds } } );
       return courses;
-    } catch (error) {
-      handleServiceError(error, "Get Courses by User ID");
+    } catch ( error ) {
+      handleServiceError( error, "Get Courses by User ID" );
       throw error;
     }
   },

@@ -1,12 +1,12 @@
 import { Token } from '@features/auth/model/Token.model';
 import { sequelize } from '@config/db.config'
-import { User } from '@features/user/model/user.model';
-import { AcademicLevel } from '@features/AcademicLevel/model/academicLevel.model';
-import { Course } from '@features/course/model/course.model';
+import { User, UserCreationAttributes } from '@features/user/model/user.model';
+import { AcademicLevel, AcademicLevelCreationAttributes } from '@features/AcademicLevel/model/academicLevel.model';
+import { Course, CourseCreationAttributes } from '@features/course/model/course.model';
 import { Module } from '@features/Module/model/module.model';
 import { Lesson } from '@features/Lesson/model/lesson.model';
 import { CourseContent } from '@features/courseContent/model/courseContent.model';
-import { Enrollment } from '@features/Enrollment/model/enrollment.model';
+import { Enrollment, EnrollmentCreationAttributes} from '@features/Enrollment/model/enrollment.model';
 import { Attendance } from '@features/Attendance/model/attendance.model';
 import { Schedule } from '@features/Schedule/model/schedule.model';
 import { Question } from '@features/Question/model/question.model';
@@ -69,4 +69,4 @@ Submission.belongsTo(Enrollment, { foreignKey: 'enrollmentId', as: 'SubmissionEn
 Lesson.hasMany(Submission, { foreignKey: 'lessonId', as: 'submissions' });
 Submission.belongsTo(Lesson, { foreignKey: 'lessonId', as: 'lesson' });
 
-export { sequelize, User, Token, AcademicLevel, Course, Module, Lesson, CourseContent, Enrollment, Attendance, Schedule, Quiz, Question, QuestionOpt, Assignment, Submission}
+export { sequelize, User, Token, AcademicLevel, Course, Module, Lesson, CourseContent, Enrollment, Attendance, Schedule, Quiz, Question, QuestionOpt, Assignment, Submission, CourseCreationAttributes, AcademicLevelCreationAttributes, EnrollmentCreationAttributes, UserCreationAttributes}

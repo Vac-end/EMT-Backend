@@ -3,9 +3,9 @@ import { JwtPayload } from 'jsonwebtoken';
 export interface CustomJwtPayload extends JwtPayload {
   id: string;
   role: 'estudiante' | 'docente' | 'administrador';
-  academicLevelId?: string | null;
   email: string;
   name: string;
+  academicLevelId?: string | null;
   iat?: number;
   exp?: number;
 }

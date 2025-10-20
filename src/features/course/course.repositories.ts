@@ -1,4 +1,5 @@
-import { Course, CourseCreationAttributes } from './model/course.model';
+import { AcademicLevel, Course, Enrollment, User, CourseCreationAttributes } from '@interfaces/models';
+
 
 export const courseRepository = {
   findAll: () =>
@@ -7,11 +8,41 @@ export const courseRepository = {
   findById: ( id: string ) =>
     Course.findByPk( id ),
 
+  findAdminDashboardCourses: (limit: number, offset: number) =>
+    Course.findAndCountAll( {
+      limit: limit,
+      offset: offset,
+      distinct: true,
+      attributes: [ 'id', 'tittle', 'coverImageUrl', 'academicLevelId', 'createdAt' ],
+      include: [
+        {
+          model: AcademicLevel,
+          as: 'CourseAcademicLevel',
+          attributes: [ 'name' ],
+          required: false
+        },
+        {
+          model: Enrollment,
+          as: 'CourseEnrolledUsers',
+          attributes: [ 'role', 'userId' ],
+          required: false,
+          include: [
+            {
+              model: User,
+              as: 'EnrolledUser',
+              attributes: [ 'name' ]
+            }
+          ]
+        }
+      ],
+      order: [['createdAt', 'DESC']]
+    } ),
+
   findByCreatedId: ( createdBy: string ) =>
     Course.findAll( { where: { createdBy } } ),
 
   findByAcademicLevelId: ( academicLevelId: string ) =>
-    Course.findAll( {where: { academicLevelId }} ),
+    Course.findAll( { where: { academicLevelId } } ),
 
   create: ( data: CourseCreationAttributes ) =>
     Course.create( data ),

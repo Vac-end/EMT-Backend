@@ -1,5 +1,5 @@
 import { handleServiceError } from '@utils/helpers';
-import { academicLevelService } from './academicLevel.service';
+import { academicLevelService } from '@features/AcademicLevel/academicLevel.service';
 import { Request, Response } from 'express';
 
 export const AcademicLevelController = {

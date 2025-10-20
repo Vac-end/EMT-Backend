@@ -2,8 +2,8 @@ import { authMiddleware } from '@middlewares/auth.middleware';
 import { Router } from 'express';
 import { roleMiddleware } from '@middlewares/role.middleware';
 import { validate } from '@middlewares/validation.middleware';
-import { academicLevelSchema } from './model/academicLevel.validation';
-import { AcademicLevelController } from './academicLevel.controller';
+import { academicLevelSchema } from '@features/AcademicLevel/model/academicLevel.validation';
+import { AcademicLevelController } from '@features/AcademicLevel/academicLevel.controller';
 
 const router = Router();
 

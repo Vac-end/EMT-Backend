@@ -39,6 +39,38 @@ export const EnrollmentController = {
     }
   },
 
+  getStudentDashboard: async (req: Request, res: Response) => {
+    try {
+      const userId = (req as any).user?.sub; 
+      const page = parseInt(req.query.page as string, 10) || 1;
+      const limit = parseInt(req.query.limit as string, 10) || 9;
+      if (!userId) {
+        return res.status(401).json({ message: 'Usuario no autenticado' });
+      }
+      const result = await EnrollmentService.getStudentDashboard(userId, page, limit);
+      return res.status(200).json(result);
+    } catch (error) {
+      handleServiceError(error, 'Get Student Dashboard');
+      return res.status(500).json({ message: 'Failed to fetch student dashboard courses' });
+    }
+  },
+
+  getTeacherDashboard: async (req: Request, res: Response) => {
+    try {
+      const userId = (req as any).user?.sub;
+      const page = parseInt(req.query.page as string, 10) || 1;
+      const limit = parseInt(req.query.limit as string, 10) || 9;
+      if (!userId) {
+        return res.status(401).json({ message: 'Usuario no autenticado' });
+      }
+      const result = await EnrollmentService.getTeacherDashboard(userId, page, limit);
+      return res.status(200).json(result);
+    } catch (error) {
+      handleServiceError(error, 'Get Teacher Dashboard');
+      return res.status(500).json({ message: 'Failed to fetch teacher dashboard courses' });
+    }
+  },
+
   getByCourseId: async ( req: Request, res: Response ) => {
     try {
       const { courseId } = req.params;

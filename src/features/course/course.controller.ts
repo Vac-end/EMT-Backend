@@ -26,6 +26,18 @@ export const CourseController = {
     }
   },
 
+  getAdminDashboard: async ( req: Request, res: Response ) => {
+    try {
+      const page = parseInt(req.query.page as string, 10) || 1;
+      const limit = parseInt(req.query.limit as string, 10) || 9;
+      const result = await courseService.getAdminDashboard(page, limit);
+      return res.status(200).json(result);
+    } catch ( error ) {
+      handleServiceError( error, 'Get Admin Dashboard' );
+      return res.status( 500 ).json( { message: 'Failed to fetch admin dashboard courses' } );
+    }
+  },
+
   getByCreatedId: async ( req: Request, res: Response ) => {
     try {
       const { createdBy } = req.params;

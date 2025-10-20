@@ -7,6 +7,7 @@ import { courseSchema } from './model/course.validation';
 
 const router = Router();
 
+router.get( '/admin-dashboard', authMiddleware, roleMiddleware( [ 'administrador' ] ), CourseController.getAdminDashboard );
 router.get( '/', authMiddleware, roleMiddleware( [ 'administrador' ] ), CourseController.getAll );
 router.get( '/:id', authMiddleware, CourseController.getById );
 router.get( '/CreatedBy/:createdBy', authMiddleware, CourseController.getByCreatedId );

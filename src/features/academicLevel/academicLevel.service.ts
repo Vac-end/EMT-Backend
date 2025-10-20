@@ -1,6 +1,6 @@
 import { handleServiceError } from '@utils/helpers';
-import { academicLevelRepository } from './academicLevel.repositories';
-import { AcademicLevelCreationAttributes } from './model/academicLevel.model';
+import { academicLevelRepository } from '@features/AcademicLevel/academicLevel.repositories';
+import { AcademicLevelCreationAttributes } from '@interfaces/models';
 
 export const academicLevelService = {
   getAll: async () => {

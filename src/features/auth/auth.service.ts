@@ -19,9 +19,9 @@ const generateAccessToken = (user: any) => {
   const payload = {
     sub: user.id,
     email: user.email,
+    name: user.name,
     role: user.role,
-    // use the Spanish role value saved in DB; fallback to null if missing
-    academicLevelId: user.role === 'estudiante' ? (user.academicLevelId ?? null) : null,
+    academicLevelId: user.academicLevelId,
   };
   return jwt.sign(payload, envConfig.PRIVATE_KEY, { expiresIn: '15m' });
 };
@@ -69,7 +69,7 @@ export const authService = {
       return {
         accessToken,
         refreshToken,
-        user: { id: user.id, role: user.role, email: user.email, name: user.name, academicLevelId: user.role === 'estudiante' ? user.academicLevelId : null},
+        user: { id: user.id, role: user.role, email: user.email, name: user.name, academicLevelId: user.academicLevelId },
       };
     } catch ( error ) {
       handleServiceError( error, 'Login' );

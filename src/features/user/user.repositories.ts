@@ -1,4 +1,4 @@
-import { User, UserCreationAttributes } from './model/user.model';
+import { User, UserCreationAttributes } from '@interfaces/models';
 
 export const userRepository = {
   findAll: () =>
@@ -8,7 +8,7 @@ export const userRepository = {
 
   findById: (id: string) =>
     User.findByPk(id, {
-      attributes: { exclude: ['password'] },
+      attributes: { exclude: ['password', 'createdAt', 'otpRequired', 'updatedAt'] },
     }),
 
   findByEmail: (email: string) =>
@@ -20,7 +20,7 @@ export const userRepository = {
   findByEmailWithPassword: (email: string) =>
     User.findOne({
       where: { email },
-      attributes: ['id', 'email', 'password', 'role', 'otpRequired'],
+      attributes: ['id', 'email', 'password', 'role', 'otpRequired', 'academicLevelId'],
     }),
 
   findByRole: (role: 'estudiante' | 'docente' | 'administrador') =>

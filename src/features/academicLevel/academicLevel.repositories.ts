@@ -1,5 +1,5 @@
-import { AcademicLevel } from '@interfaces/models';
-import { AcademicLevelCreationAttributes } from './model/academicLevel.model';
+import { AcademicLevel, AcademicLevelCreationAttributes} from '@interfaces/models';
+
 
 export const academicLevelRepository = {
   findAll: () =>

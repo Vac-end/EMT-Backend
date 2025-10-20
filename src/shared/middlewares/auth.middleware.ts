@@ -19,7 +19,7 @@ export const authMiddleware = ( req: Request, res: Response, next: NextFunction 
     return next();
   } catch ( err: unknown ) {
     if ( err instanceof jwt.TokenExpiredError ) {
-      logger.warn( '⏰ Token expired', { path: req.path } );
+      logger.warn( 'Token expired', { path: req.path } );
       return res.status( 401 ).json( { message: 'Token has expired' } );
     }
     if ( err instanceof jwt.JsonWebTokenError ) {
