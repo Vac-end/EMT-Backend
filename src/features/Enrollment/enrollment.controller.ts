@@ -39,35 +39,47 @@ export const EnrollmentController = {
     }
   },
 
-  getStudentDashboard: async (req: Request, res: Response) => {
+  getStudentDashboard: async ( req: Request, res: Response ) => {
     try {
-      const userId = (req as any).user?.sub; 
-      const page = parseInt(req.query.page as string, 10) || 1;
-      const limit = parseInt(req.query.limit as string, 10) || 9;
-      if (!userId) {
-        return res.status(401).json({ message: 'Usuario no autenticado' });
+      const userId = ( req as any ).user?.sub;
+      const page = parseInt( req.query.page as string, 10 ) || 1;
+      const limit = parseInt( req.query.limit as string, 10 ) || 9;
+      if ( !userId ) {
+        return res.status( 401 ).json( { message: 'Usuario no autenticado' } );
       }
-      const result = await EnrollmentService.getStudentDashboard(userId, page, limit);
-      return res.status(200).json(result);
-    } catch (error) {
-      handleServiceError(error, 'Get Student Dashboard');
-      return res.status(500).json({ message: 'Failed to fetch student dashboard courses' });
+      const result = await EnrollmentService.getStudentDashboard( userId, page, limit );
+      return res.status( 200 ).json( result );
+    } catch ( error ) {
+      handleServiceError( error, 'Get Student Dashboard' );
+      return res.status( 500 ).json( { message: 'Failed to fetch student dashboard courses' } );
     }
   },
 
-  getTeacherDashboard: async (req: Request, res: Response) => {
+  getTeacherDashboard: async ( req: Request, res: Response ) => {
     try {
-      const userId = (req as any).user?.sub;
-      const page = parseInt(req.query.page as string, 10) || 1;
-      const limit = parseInt(req.query.limit as string, 10) || 9;
-      if (!userId) {
-        return res.status(401).json({ message: 'Usuario no autenticado' });
+      const userId = ( req as any ).user?.sub;
+      const page = parseInt( req.query.page as string, 10 ) || 1;
+      const limit = parseInt( req.query.limit as string, 10 ) || 9;
+      if ( !userId ) {
+        return res.status( 401 ).json( { message: 'Usuario no autenticado' } );
       }
-      const result = await EnrollmentService.getTeacherDashboard(userId, page, limit);
-      return res.status(200).json(result);
-    } catch (error) {
-      handleServiceError(error, 'Get Teacher Dashboard');
-      return res.status(500).json({ message: 'Failed to fetch teacher dashboard courses' });
+      const result = await EnrollmentService.getTeacherDashboard( userId, page, limit );
+      return res.status( 200 ).json( result );
+    } catch ( error ) {
+      handleServiceError( error, 'Get Teacher Dashboard' );
+      return res.status( 500 ).json( { message: 'Failed to fetch teacher dashboard courses' } );
+    }
+  },
+
+  getCourseParticipants: async ( req: Request, res: Response ) => {
+    try {
+      const { courseId } = req.params;
+      if ( !courseId ) return res.status( 400 ).json( { message: 'Course ID is required' } );
+      const result = await EnrollmentService.getCourseParticipants( courseId );
+      return res.status( 200 ).json( result );
+    } catch ( error ) {
+      handleServiceError( error, 'Get Course Participants' );
+      return res.status( 500 ).json( { message: 'Failed to fetch participants' } );
     }
   },
 
@@ -84,18 +96,18 @@ export const EnrollmentController = {
     }
   },
 
-  getCoursesByUserId: async (req: Request, res: Response) => {
+  getCoursesByUserId: async ( req: Request, res: Response ) => {
     try {
       const { userId } = req.params;
-      if (!userId) return res.status(400).json({ message: 'User ID is required' });
-      const courses = await EnrollmentService.getCoursesByUserId(userId);
-      return res.status(200).json(courses);
-    } catch (error) {
-      handleServiceError(error, 'Get Courses by User ID');
-      return res.status(500).json({ message: 'Failed to fetch courses' });
+      if ( !userId ) return res.status( 400 ).json( { message: 'User ID is required' } );
+      const courses = await EnrollmentService.getCoursesByUserId( userId );
+      return res.status( 200 ).json( courses );
+    } catch ( error ) {
+      handleServiceError( error, 'Get Courses by User ID' );
+      return res.status( 500 ).json( { message: 'Failed to fetch courses' } );
     }
   },
-  
+
   getByRole: async ( req: Request, res: Response ) => {
     try {
       const enrollments = await EnrollmentService.getByRole( req.params.role as 'estudiante' | 'docente' | 'soporte' );

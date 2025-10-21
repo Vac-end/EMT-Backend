@@ -7,6 +7,7 @@ export interface EnrollmentAttributes {
   courseId: string;
   role: 'estudiante' | 'docente' | 'soporte';
   enrollmentDate: Date;
+  groupId?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -19,6 +20,7 @@ export class Enrollment extends Model<EnrollmentAttributes, EnrollmentCreationAt
   declare courseId: string;
   declare role: 'estudiante' | 'docente' | 'soporte';
   declare enrollmentDate: Date;
+  declare groupId: string | null;
   declare readonly createdAt?: Date;
   declare readonly updatedAt?: Date;
 }
@@ -27,8 +29,9 @@ Enrollment.init( {
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true, allowNull: false },
   userId: { type: DataTypes.UUID, allowNull: false, references: { model: 'User', key: 'id' } },
   courseId: { type: DataTypes.UUID, allowNull: false, references: { model: 'Course', key: 'id' } },
-  role: { type: DataTypes.ENUM( 'estudiante', 'docente', 'soporte'), allowNull: false, defaultValue: 'estudiante' },
+  role: { type: DataTypes.ENUM( 'estudiante', 'docente', 'soporte' ), allowNull: false, defaultValue: 'estudiante' },
   enrollmentDate: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+  groupId: { type: DataTypes.UUID, allowNull: true, references: { model: 'Group', key: 'id' }, onDelete: 'SET NULL', onUpdate: 'CASCADE' },
   createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
 }, { sequelize, modelName: 'Enrollment', timestamps: true } );

@@ -1,6 +1,9 @@
 import { handleServiceError } from '@utils/helpers';
 import { enrollmentRepository } from './enrollment.repositories';
-import { Enrollment, EnrollmentCreationAttributes, Course } from '@interfaces/models';
+import { Enrollment, EnrollmentCreationAttributes, Course, Announcement, GlobalTracking, AcademicLevel } from '@interfaces/models';
+import { globalTrackingService } from '@features/GlobalTracking/globaltracking.service';
+import { StudentDashboardCourse } from '@features/course/model/student-dashboard-course';
+import { Op } from 'sequelize';
 
 export const EnrollmentService = {
   getAll: async () => {
@@ -37,7 +40,7 @@ export const EnrollmentService = {
     try {
       const offset = ( page - 1 ) * limit;
       const { count, rows } = await enrollmentRepository.findStudentDashboardCourses( userId, limit, offset );
-      const dashboardCourses = rows.map( enrollment => {
+      const dashboardCoursesPromises = rows.map( async ( enrollment ) => {
         const course: any = ( enrollment as any ).EnrolledCourse;
         if ( !course ) return null;
         const allCourseEnrollments = course.CourseEnrolledUsers || [];
@@ -45,6 +48,20 @@ export const EnrollmentService = {
         const teacherName = teacherEnrollment?.EnrolledUser?.name ?? 'No asignado';
         const studentCount = allCourseEnrollments.filter( ( e: any ) => e.role === 'estudiante' ).length;
         const academicLevelName = course.CourseAcademicLevel?.name ?? 'General';
+        const completionPercentage = await globalTrackingService.calculateLessonCompletionPercentage( userId, course.id );
+        const courseAnnouncements = await Announcement.findAll( {
+          where: { courseId: course.id },
+          attributes: [ 'id' ]
+        } );
+        const announcementIds = courseAnnouncements.map( ann => ann.id );
+
+        let newAnnouncementsCount = 0;
+        if ( announcementIds.length > 0 ) {
+          const viewedCount = await GlobalTracking.count( {
+            where: { userId: userId, trackableType: 'announcement', trackableId: { [ Op.in ]: announcementIds } }
+          } );
+          newAnnouncementsCount = announcementIds.length - viewedCount;
+        }
         return {
           enrollmentId: enrollment.id,
           course: {
@@ -55,11 +72,14 @@ export const EnrollmentService = {
           },
           resolvedTeacher: teacherName,
           resolvedEnrollmentCount: studentCount,
+          completionPercentage: completionPercentage,
+          newAnnouncementsCount: newAnnouncementsCount
         };
       } );
+      const dashboardCourses = ( await Promise.all( dashboardCoursesPromises ) ).filter( Boolean );
       return {
         totalItems: count,
-        courses: dashboardCourses,
+        courses: dashboardCourses as StudentDashboardCourse[],
         totalPages: Math.ceil( count / limit ),
         currentPage: page,
       };
@@ -73,7 +93,7 @@ export const EnrollmentService = {
     try {
       const offset = ( page - 1 ) * limit;
       const { count, rows } = await enrollmentRepository.findTeacherDashboardCourses( userId, limit, offset );
-      const dashboardCourses = rows.map( enrollment => {
+      const dashboardCoursesPromises = rows.map( async ( enrollment ) => {
         const enrollmentData: any = enrollment;
         const course: any = enrollmentData.EnrolledCourse;
         if ( !course ) return null;
@@ -81,6 +101,16 @@ export const EnrollmentService = {
         const studentCount = allCourseEnrollments.filter( ( e: any ) => e.role === 'estudiante' ).length;
         const academicLevelName = course.CourseAcademicLevel?.name ?? 'General';
         const teacherName = enrollmentData.EnrolledUser?.name ?? 'Profesor';
+        const completionPercentage = await globalTrackingService.calculateLessonCompletionPercentage( userId, course.id );
+        const courseAnnouncements = await Announcement.findAll( { where: { courseId: course.id }, attributes: [ 'id' ] } );
+        const announcementIds = courseAnnouncements.map( ann => ann.id );
+        let newAnnouncementsCount = 0;
+        if ( announcementIds.length > 0 ) {
+          const viewedCount = await GlobalTracking.count( {
+            where: { userId: userId, trackableType: 'announcement', trackableId: { [ Op.in ]: announcementIds } }
+          } );
+          newAnnouncementsCount = announcementIds.length - viewedCount;
+        }
         return {
           enrollmentId: enrollmentData.id,
           course: {
@@ -91,16 +121,46 @@ export const EnrollmentService = {
           },
           resolvedTeacher: teacherName,
           resolvedEnrollmentCount: studentCount,
+          completionPercentage: completionPercentage,
+          newAnnouncementsCount: newAnnouncementsCount
         };
       } );
+      const dashboardCourses = ( await Promise.all( dashboardCoursesPromises ) ).filter( Boolean );
       return {
         totalItems: count,
-        courses: dashboardCourses,
+        courses: dashboardCourses as StudentDashboardCourse[],
         totalPages: Math.ceil( count / limit ),
         currentPage: page,
       };
     } catch ( error ) {
       handleServiceError( error, "Get Teacher Dashboard Courses" );
+      throw error;
+    }
+  },
+
+  getCourseParticipants: async (courseId: string) => {
+    try {
+      const course = await Course.findByPk(courseId, { 
+          attributes: ['id', 'tittle', 'academicLevelId'],
+          include: [{
+              model: AcademicLevel,
+              as: 'CourseAcademicLevel',
+              attributes: ['name'] 
+          }] 
+      });
+      if (!course) throw new Error('Course not found');
+      const participants = await enrollmentRepository.findParticipantsByCourseId(courseId);
+      
+      return {
+        course: {
+            id: course.id,
+            tittle: course.tittle,
+            academicLevelName: (course as any).CourseAcademicLevel?.name ?? null
+        },
+        participants: participants 
+      };
+    } catch (error) {
+      handleServiceError(error, "Get Course Participants");
       throw error;
     }
   },

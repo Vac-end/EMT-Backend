@@ -33,7 +33,7 @@ export const enrollmentRepository = {
             {
               model: AcademicLevel,
               as: 'CourseAcademicLevel',
-              attributes: [ 'name' ],
+              attributes: [ 'name', 'orderIndex' ],
               required: false
             },
             {
@@ -51,7 +51,10 @@ export const enrollmentRepository = {
             }
           ]
         }
-      ], order: [ [ { model: Course, as: 'EnrolledCourse' }, 'createdAt', 'DESC' ] ]
+      ], order: [
+        [ { model: Course, as: 'EnrolledCourse' }, { model: AcademicLevel, as: 'CourseAcademicLevel' }, 'orderIndex', 'ASC' ],
+        [ { model: Course, as: 'EnrolledCourse' }, 'tittle', 'ASC' ]
+      ]
     } ),
 
   findTeacherDashboardCourses: ( userId: string, limit: number, offset: number ) =>
@@ -75,7 +78,7 @@ export const enrollmentRepository = {
             {
               model: AcademicLevel,
               as: 'CourseAcademicLevel',
-              attributes: [ 'name' ],
+              attributes: [ 'name', 'orderIndex' ],
               required: false
             },
             {
@@ -88,7 +91,22 @@ export const enrollmentRepository = {
         }
       ],
       order: [
-        [ { model: Course, as: 'EnrolledCourse' }, 'createdAt', 'DESC' ]
+        [ { model: Course, as: 'EnrolledCourse' }, { model: AcademicLevel, as: 'CourseAcademicLevel' }, 'orderIndex', 'ASC' ],
+        [ { model: Course, as: 'EnrolledCourse' }, 'tittle', 'ASC' ]
+      ]
+    } ),
+
+  findParticipantsByCourseId: ( courseId: string ) =>
+    Enrollment.findAll( {
+      where: { courseId },
+      include: [ {
+        model: User,
+        as: 'EnrolledUser',
+        attributes: [ 'id', 'name', 'email', 'imagePerfilUrl' ]
+      } ],
+      order: [
+        [ 'role', 'ASC' ],
+        [ { model: User, as: 'EnrolledUser' }, 'name', 'ASC' ]
       ]
     } ),
 

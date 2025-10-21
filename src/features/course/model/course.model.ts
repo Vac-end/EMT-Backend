@@ -7,6 +7,7 @@ export interface CourseAttributes {
   description: string;
   coverImageUrl: string;
   createdBy: string;
+  groupsEnabled: boolean;
   academicLevelId?: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -20,6 +21,7 @@ export class Course extends Model<CourseAttributes, CourseCreationAttributes> im
   declare description: string;
   declare coverImageUrl: string;
   declare createdBy: string;
+  declare groupsEnabled: boolean;
   declare academicLevelId?: string;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
@@ -32,6 +34,7 @@ Course.init( {
   coverImageUrl: { type: DataTypes.STRING, allowNull: true },
   createdBy: { type: DataTypes.UUID, allowNull: false, references: { model: 'User', key: 'id' } },
   academicLevelId: { type: DataTypes.UUID, allowNull: true, references: { model: 'AcademicLevel', key: 'id' } },
+  groupsEnabled: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
   createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
 }, { sequelize, modelName: 'Course', timestamps: true }

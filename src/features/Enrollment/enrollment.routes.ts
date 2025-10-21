@@ -13,6 +13,7 @@ router.get( '/', authMiddleware, roleMiddleware( [ 'administrador' ] ), Enrollme
 router.get( '/:id', authMiddleware, EnrollmentController.getById );
 router.get( '/user/:userId', authMiddleware, EnrollmentController.getByUserId );
 router.get( '/course/:courseId', authMiddleware, EnrollmentController.getByCourseId );
+router.get( '/course/:courseId/participants', authMiddleware, EnrollmentController.getCourseParticipants );
 router.get( '/role/:role', authMiddleware, EnrollmentController.getByRole );
 router.get( '/user/:userId/courses', authMiddleware, EnrollmentController.getCoursesByUserId );
 router.post( '/', authMiddleware, roleMiddleware( [ 'docente', 'administrador' ] ), validate( EnrollmentSchema ), EnrollmentController.create );

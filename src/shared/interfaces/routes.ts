@@ -2,7 +2,7 @@ import { Router } from 'express'
 import authRoutes from '@features/auth/auth.routes'
 import userRoutes from '@features/user/user.routes'
 import attendanceRoutes from '@features/Attendance/attendance.routes'
-import academicLevelRoutes from '@features/academicLevel/academicLevel.routes'
+import academicLevelRoutes from '@features/AcademicLevel/academicLevel.routes'
 import courseRoutes from '@features/course/course.routes'
 import moduleRoutes from '@features/Module/module.routes'
 import lessonRoutes from '@features/Lesson/lesson.routes'
@@ -14,6 +14,8 @@ import questionRoutes from '@features/Question/question.routes'
 import questionOpsRoutes from '@features/Question/questionOpt.routes'
 import assignmentRoutes from '@features/Assignment/assignment.routes'
 import submissionRoutes from '@features/Submission/submission.routes'
+import trackRoutes from '@features/GlobalTracking/globaltracking.routes'
+import groupRoutes from '@features/Group/group.routes'
 
 const router = Router();
 
@@ -32,5 +34,7 @@ router.use('/questions', questionRoutes);
 router.use('/questionOps', questionOpsRoutes);
 router.use('/assignments', assignmentRoutes);
 router.use('/submissions', submissionRoutes);
+router.use('/tracks', trackRoutes);
+router.use('/groups', groupRoutes);
 
 export default router;
