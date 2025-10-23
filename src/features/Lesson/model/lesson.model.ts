@@ -6,9 +6,7 @@ export interface LessonAttributes {
   moduleId: string;
   tittle: string;
   orderIndex: number;
-  type: 'video' | 'archivo' | 'link' | 'image';
   description?: string;
-  contentUrl?: string;
   duration?: number;
   createdAt?: Date;
   updatedAt?: Date;
@@ -21,9 +19,7 @@ export class Lesson extends Model<LessonAttributes, LessonCreationAttributes> im
   declare moduleId: string;
   declare tittle: string;
   declare orderIndex: number;
-  declare type: 'video' | 'archivo' | 'link' | 'image';
   declare description?: string;
-  declare contentUrl?: string;
   declare duration?: number;
   declare readonly createdAt?: Date;
   declare readonly updatedAt?: Date;
@@ -35,8 +31,6 @@ Lesson.init( {
   tittle: { type: DataTypes.STRING, allowNull: false },
   description: { type: DataTypes.STRING, allowNull: true },
   orderIndex: { type: DataTypes.INTEGER, allowNull: false },
-  contentUrl: { type: DataTypes.STRING, allowNull: true },
-  type: { type: DataTypes.ENUM( 'video', 'archivo', 'link', 'image'), allowNull: false, defaultValue: 'video'},
   duration: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
   createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },

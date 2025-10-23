@@ -61,7 +61,7 @@ export const courseRepository = {
             {
               model: Lesson,
               as: 'ModuleLessonsList',
-              attributes: [ 'id', 'tittle', 'description', 'type', 'contentUrl', 'duration', 'orderIndex' ],
+              attributes: [ 'id', 'tittle', 'description', 'duration', 'orderIndex' ],
               separate: true,
               order: [ [ 'orderIndex', 'ASC' ] ],
               include: [
@@ -87,7 +87,7 @@ export const courseRepository = {
                 {
                   model: CourseContent,
                   as: 'LessonCourseContentList',
-                  attributes: ['id', 'type', 'contentUrl', 'description', 'orderIndex'],
+                  attributes: ['id', 'type', 'contentUrl', 'contentBody', 'description', 'orderIndex'],
                   required: false,
                   separate: true,
                   order: [['orderIndex', 'ASC']]

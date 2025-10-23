@@ -1,12 +1,14 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import { sequelize } from '@config/db.config';
 
+export type CourseContentType = 'video' | 'pdf' | 'text' | 'html' | 'link' | 'image' | 'xlsx' | 'other';
 export interface CourseContentAttributes {
   id: string;
   lessonId: string;
-  type: 'video' | 'pdf' | 'quiz' | 'assignment' | 'other';
+  type: CourseContentType;
   orderIndex: number;
   contentUrl?: string;
+  contentBody?: string;
   description?: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -17,9 +19,10 @@ export interface CourseContentCreationAttributes extends Optional<CourseContentA
 export class CourseContent extends Model<CourseContentAttributes, CourseContentCreationAttributes> implements CourseContentAttributes {
   declare id: string;
   declare lessonId: string;
-  declare type: 'video' | 'pdf' | 'quiz' | 'assignment' | 'other';
+  declare type: CourseContentType;
   declare orderIndex: number;
   declare contentUrl?: string;
+  declare contentBody?: string;
   declare description?: string;
   declare readonly createdAt?: Date;
   declare readonly updatedAt?: Date;
@@ -27,9 +30,10 @@ export class CourseContent extends Model<CourseContentAttributes, CourseContentC
 
 CourseContent.init( {
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true, allowNull: false },
-  lessonId: { type: DataTypes.UUID, allowNull: false, references: { model: 'Lesson', key: 'id'}},
-  type: { type: DataTypes.ENUM('video', 'pdf', 'quiz', 'assignment', 'other'), allowNull: false, defaultValue: 'other' },
+  lessonId: { type: DataTypes.UUID, allowNull: false, references: { model: 'Lesson', key: 'id' } },
+  type: { type: DataTypes.ENUM( 'video', 'pdf', 'text', 'html', 'link', 'image', 'xlsx', 'other' ), allowNull: false, defaultValue: 'other' },
   orderIndex: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+  contentBody: { type: DataTypes.TEXT, allowNull: true },
   contentUrl: { type: DataTypes.STRING, allowNull: true },
   description: { type: DataTypes.STRING, allowNull: true },
   createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
