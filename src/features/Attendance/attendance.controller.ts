@@ -88,6 +88,27 @@ export const AttendanceController = {
     }
   },
 
+  getAttendanceSummary: async ( req: Request, res: Response ) => {
+    try {
+      const { courseId, userId } = req.params;
+      if ( !courseId ) {
+        return res.status( 400 ).json( { message: 'Se requiere el ID del curso (courseId).' } );
+      }
+      if ( !userId ) {
+        return res.status( 400 ).json( { message: 'Se requiere el ID del usuario (userId).' } );
+      }
+      const summaryData = await attendanceService.getAttendanceSummaryForUser( courseId, userId );
+      if ( !summaryData || !summaryData.user ) {
+        return res.status( 404 ).json( { message: 'No se encontró inscripción para este usuario en el curso.' } );
+      }
+      return res.status( 200 ).json( summaryData );
+
+    } catch ( error ) {
+      handleServiceError( error, 'Get Attendance Summary' );
+      return res.status( 500 ).json( { message: 'Error al obtener el resumen de asistencia.' } );
+    }
+  },
+
   createForLesson: async ( req: Request, res: Response ) => {
     try {
       const { lessonId } = req.body;

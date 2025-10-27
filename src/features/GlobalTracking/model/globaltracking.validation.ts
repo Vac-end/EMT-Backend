@@ -1,6 +1,6 @@
 import z from 'zod';
 
-const trackableTypes = z.enum(['module', 'lesson', 'quiz', 'assignment', 'announcement']);
+const trackableTypes = z.enum(['module', 'lesson', 'quiz', 'assignment', 'announcement', 'course_content']);
 const trackingStatuses = z.enum(['viewed', 'completed', 'started', 'submitted']);
 
 export const globalTrackingSchema = z.object({

@@ -5,6 +5,7 @@ import { Attendance, AttendanceCreationAttributes } from './model/attendance.mod
 import { sequelize } from '@config/db.config';
 import { Op, UniqueConstraintError, WhereOptions } from 'sequelize';
 import { validateAttendancePayload, validateBusinessRules, validateCreateAttendanceForLesson, validateUpdateOptions } from './model/attendance.validation';
+import { Enrollment, User } from '@interfaces/models';
 
 export const attendanceService = {
   getAll: async () => {
@@ -68,16 +69,77 @@ export const attendanceService = {
     }
   },
 
+  getAttendanceSummaryForUser: async ( courseId: string, userId: string ) => {
+    try {
+      if ( !courseId || !userId ) {
+        throw new Error( 'Se requieren courseId y userId.' );
+      }
+      const enrollment = await Enrollment.findOne( {
+        where: { courseId, userId },
+        include: [ { model: User, as: 'EnrolledUser', attributes: [ 'id', 'name', 'imagePerfilUrl' ] } ]
+      } );
+
+      if ( !enrollment ) {
+        return {
+          user: null,
+          summary: {
+            percentage: 0,
+            presentCount: 0,
+            lateCount: 0,
+            absentCount: 0,
+            totalRecords: 0,
+          }
+        };
+      }
+      const userData = ( enrollment as any ).EnrolledUser?.get( { plain: true } );
+      if ( !userData ) {
+        throw new Error( 'No se pudieron cargar los datos del usuario asociado a la inscripción.' );
+      }
+      const attendanceRecords = await AttendanceRepository.findByEnrollmentId( enrollment.id );
+      let presentCount = 0;
+      let lateCount = 0;
+      let absentCount = 0;
+      attendanceRecords.forEach( record => {
+        if ( record.status === 'present' ) {
+          presentCount++;
+        } else if ( record.status === 'late' ) {
+          lateCount++;
+        } else if ( record.status === 'absent' ) {
+          absentCount++;
+        }
+      } );
+      const totalRecords = attendanceRecords.length;
+      const attendedCount = presentCount + lateCount;
+      const percentage = totalRecords > 0 ? Math.round( ( attendedCount / totalRecords ) * 100 ) : 0;
+      return {
+        user: {
+          id: userData.id,
+          name: userData.name,
+          imagePerfilUrl: userData.imagePerfilUrl,
+        },
+        summary: {
+          percentage: percentage,
+          presentCount: presentCount,
+          lateCount: lateCount,
+          absentCount: absentCount,
+          totalRecords: totalRecords,
+        }
+      };
+
+    } catch ( error ) {
+      handleServiceError( error, "Get Attendance Summary for User" );
+      throw error;
+    }
+  },
+
   createAttendanceForLesson: async ( lessonId: string ) => {
     try {
       const { enrollments } = await validateCreateAttendanceForLesson( lessonId );
-
       const attendanceData: AttendanceCreationAttributes[] = enrollments.map( ( e ) => ( {
         enrollmentId: e.id,
         lessonId,
         status: 'absent',
       } ) );
-
       return await sequelize.transaction( async ( t ) =>
         Attendance.bulkCreate( attendanceData, { validate: true, transaction: t } )
       );

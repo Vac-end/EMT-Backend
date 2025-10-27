@@ -7,7 +7,7 @@ export const ScheduleRepository = {
     Schedule.findByPk( id ),
 
   findByLessonId: ( lessonId: string ) =>
-    Schedule.findOne( { where: { lessonId }, } ),
+    Schedule.findAll( { where: { lessonId }, } ),
 
   findByCourseId: ( courseId: string ) =>
     Schedule.findAll( { where: { courseId } } ),

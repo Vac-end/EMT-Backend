@@ -4,8 +4,8 @@ import { sequelize } from '@config/db.config';
 export interface SubmissionAttributes{
   id: string;
   enrollmentId: string;
-  lessonId: string;
-  type: 'quiz' | 'assignment';
+  assignmentId: string;
+  quizId: string;
   grade: number;
   feedback: string;
   fileUrl?: string;
@@ -19,8 +19,8 @@ export interface SubmissionCreationAttributes extends Optional<SubmissionAttribu
 export class Submission extends Model<SubmissionAttributes, SubmissionCreationAttributes> implements SubmissionAttributes{
   declare id: string;
   declare enrollmentId: string;
-  declare lessonId: string;
-  declare type: 'quiz' | 'assignment';
+  declare assignmentId: string;
+  declare quizId: string;
   declare grade: number;
   declare feedback: string;
   declare fileUrl?: string;
@@ -32,8 +32,8 @@ export class Submission extends Model<SubmissionAttributes, SubmissionCreationAt
 Submission.init({
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true, allowNull: false },
   enrollmentId: { type: DataTypes.UUID, allowNull: false, references: { model: 'Enrollment', key: 'id' } },
-  lessonId: { type: DataTypes.UUID, allowNull: false, references: { model: 'Lesson', key: 'id' } },
-  type: { type: DataTypes.ENUM( 'quiz', 'assignment' ), allowNull: false },
+  assignmentId: { type: DataTypes.UUID, allowNull: false, references: { model: 'Assignment', key: 'id' } },
+  quizId: { type: DataTypes.UUID, allowNull: false, references: { model: 'Quiz', key: 'id' } },
   grade: { type: DataTypes.DECIMAL(5,2), allowNull: false, defaultValue: 0.00 },
   feedback: { type: DataTypes.STRING, allowNull: false },
   fileUrl: { type: DataTypes.STRING, allowNull: true },

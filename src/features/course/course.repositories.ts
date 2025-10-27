@@ -48,7 +48,7 @@ export const courseRepository = {
         {
           model: AcademicLevel,
           as: 'CourseAcademicLevel',
-          attributes: ['name'],
+          attributes: [ 'name' ],
           required: false
         },
         {
@@ -87,10 +87,10 @@ export const courseRepository = {
                 {
                   model: CourseContent,
                   as: 'LessonCourseContentList',
-                  attributes: ['id', 'type', 'contentUrl', 'contentBody', 'description', 'orderIndex'],
+                  attributes: [ 'id', 'type', 'contentUrl', 'contentBody', 'description', 'orderIndex' ],
                   required: false,
                   separate: true,
-                  order: [['orderIndex', 'ASC']]
+                  order: [ [ 'orderIndex', 'ASC' ] ]
                 }
               ]
             }

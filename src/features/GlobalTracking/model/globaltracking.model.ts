@@ -5,7 +5,7 @@ export interface GlobalTrackingAttributes {
   id: string;
   userId: string;
   courseId: string;
-  trackableType: 'module' | 'lesson' | 'quiz' | 'assignment' | 'announcement';
+  trackableType: 'module' | 'lesson' | 'quiz' | 'assignment' | 'announcement' | 'course_content';
   trackableId: string;
   status: 'viewed' | 'completed' | 'started' | 'submitted';
   completedAt?: Date | null;
@@ -18,7 +18,7 @@ export class GlobalTracking extends Model<GlobalTrackingAttributes, GlobalTracki
   declare id: string;
   declare userId: string;
   declare courseId: string;
-  declare trackableType: 'module' | 'lesson' | 'quiz' | 'assignment' | 'announcement';
+  declare trackableType: 'module' | 'lesson' | 'quiz' | 'assignment' | 'announcement' | 'course_content' ;
   declare trackableId: string;
   declare status: 'viewed' | 'completed' | 'started' | 'submitted';
   declare completedAt: Date | null;
@@ -29,7 +29,7 @@ GlobalTracking.init( {
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true, allowNull: false },
   userId: { type: DataTypes.UUID, allowNull: false, references: { model: 'User', key: 'id' } },
   courseId: { type: DataTypes.UUID, allowNull: false, references: { model: 'Course', key: 'id' } },
-  trackableType: { type: DataTypes.ENUM( 'module', 'lesson', 'quiz', 'assignment', 'announcement' ), allowNull: false },
+  trackableType: { type: DataTypes.ENUM( 'module', 'lesson', 'quiz', 'assignment', 'announcement', 'course_content' ), allowNull: false },
   trackableId: { type: DataTypes.UUID, allowNull: false },
   status: { type: DataTypes.ENUM( 'viewed', 'completed', 'started', 'submitted' ), defaultValue: 'viewed', allowNull: false },
   completedAt: { type: DataTypes.DATE, allowNull: true },

@@ -5,6 +5,8 @@ import { globalTrackingService } from '@features/GlobalTracking/globaltracking.s
 import { StudentDashboardCourse } from '@features/course/model/student-dashboard-course';
 import { Op } from 'sequelize';
 
+const desiredRoleOrder = ['docente', 'soporte', 'estudiante'];
+
 export const EnrollmentService = {
   getAll: async () => {
     try {
@@ -150,7 +152,20 @@ export const EnrollmentService = {
       });
       if (!course) throw new Error('Course not found');
       const participants = await enrollmentRepository.findParticipantsByCourseId(courseId);
-      
+      participants.sort((a, b) => {
+        const indexA = desiredRoleOrder.indexOf(a.role);
+        const indexB = desiredRoleOrder.indexOf(b.role);
+        const orderA = indexA === -1 ? Infinity : indexA;
+        const orderB = indexB === -1 ? Infinity : indexB;
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
+        const nameA = (a as any).EnrolledUser?.name?.toLowerCase() || ''; 
+        const nameB = (b as any).EnrolledUser?.name?.toLowerCase() || '';
+        if (nameA < nameB) return -1;
+        if (nameA > nameB) return 1;
+        return 0;
+      });
       return {
         course: {
             id: course.id,

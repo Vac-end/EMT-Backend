@@ -74,8 +74,11 @@ Assignment.belongsTo( Lesson, { foreignKey: 'lessonId', as: 'AssignmentLesson' }
 Enrollment.hasMany( Submission, { foreignKey: 'enrollmentId', as: 'EnrollmentSubmissions' } );
 Submission.belongsTo( Enrollment, { foreignKey: 'enrollmentId', as: 'SubmissionEnrollment' } );
 
-Lesson.hasMany( Submission, { foreignKey: 'lessonId', as: 'submissions' } );
-Submission.belongsTo( Lesson, { foreignKey: 'lessonId', as: 'lesson' } );
+Assignment.hasMany( Submission, { foreignKey: 'assignmentId', as: 'AssignmentSubmissions' });
+Submission.belongsTo( Assignment, { foreignKey: 'assignmentId', as: 'SubmissionAssignment' });
+
+Quiz.hasMany( Submission, { foreignKey: 'quizId', as: 'QuizSubmissions' });
+Submission.belongsTo( Quiz, { foreignKey: 'quizId', as: 'SubmissionQuiz' });
 
 Announcement.belongsTo( Course, { foreignKey: 'courseId', as: 'AnnouncementCourse' } );
 Course.hasMany( Announcement, { foreignKey: 'courseId', as: 'CourseAnnouncements' } );

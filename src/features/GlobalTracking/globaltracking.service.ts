@@ -1,6 +1,48 @@
 import { handleServiceError } from '@utils/helpers';
-import { GlobalTrackingCreationAttributes, GlobalTrackingAttributes, GlobalTracking, Lesson, Module } from '@interfaces/models';
+import { GlobalTrackingCreationAttributes, GlobalTrackingAttributes, GlobalTracking, Lesson, Module, CourseContent, Quiz, Assignment } from '@interfaces/models';
 import { globalTrackingRepository } from './globaltracking.repositories';
+import { Op } from 'sequelize';
+
+async function checkAndCompleteLesson(userId: string, courseId: string, lessonId: string): Promise<string> {
+  const contents = await CourseContent.findAll({ where: { lessonId }, attributes: ['id'] });
+  const totalTrackableItems = contents.length;
+  if (totalTrackableItems === 0) {
+    const lessonRecord = await globalTrackingRepository.findOne(userId, 'lesson', lessonId);
+    if (lessonRecord?.status === 'viewed') { 
+        await globalTrackingRepository.upsert({
+            userId, courseId, 
+            trackableType: 'lesson', 
+            trackableId: lessonId, 
+            status: 'completed', 
+            completedAt: new Date()
+        });
+        return 'completed';
+    }
+    return lessonRecord?.status || 'not_started';
+  }
+  const contentIds = contents.map(c => c.id);
+  const completedItems = await GlobalTracking.count({
+    where: {
+      userId: userId,
+      courseId: courseId,
+      status: { [Op.in]: ['viewed', 'completed', 'submitted'] }, 
+      trackableType: 'course_content',
+      trackableId: { [Op.in]: contentIds }
+    }
+  });
+  if (completedItems >= totalTrackableItems) {
+    await globalTrackingRepository.upsert({
+        userId, courseId, 
+        trackableType: 'lesson', 
+        trackableId: lessonId, 
+        status: 'completed', 
+        completedAt: new Date()
+    });
+    return 'completed';
+  }
+  const currentLessonRecord = await globalTrackingRepository.findOne(userId, 'lesson', lessonId);
+  return currentLessonRecord?.status || 'not_started';
+}
 
 export const globalTrackingService = {
   getUserProgressInCourse: async ( userId: string, courseId: string, trackableType?: GlobalTrackingAttributes[ 'trackableType' ] ) => {
@@ -19,11 +61,40 @@ export const globalTrackingService = {
         userId, courseId, trackableType, trackableId, status, completedAt: status === 'completed' ? new Date() : null
       };
       await globalTrackingRepository.upsert( dataToUpsert );
-      const updatedRecord = await globalTrackingRepository.findOne( userId, trackableType, trackableId );
-      if ( !updatedRecord ) {
-        throw new Error( 'Failed to find the record after upsert.' );
+      let parentLessonId: string | null = null;
+      let finalLessonStatus: string | null = null;
+      const itemTypes: string[] = ['course_content', 'quiz', 'assignment']; 
+      if (trackableType === 'lesson') {
+          parentLessonId = trackableId;
+      } else if (itemTypes.includes(trackableType)) {
+          if (trackableType === 'course_content') {
+              const item = await CourseContent.findByPk(trackableId, { attributes: ['lessonId'] });
+              parentLessonId = item?.lessonId || null;
+          } else if (trackableType === 'assignment') {
+              const item = await Assignment.findByPk(trackableId, { attributes: ['lessonId'] });
+              parentLessonId = item?.lessonId || null;
+          } else if (trackableType === 'quiz') {
+              const item = await Quiz.findByPk(trackableId, { attributes: ['lessonId'] });
+              parentLessonId = item?.lessonId || null;
+          }
       }
-      return updatedRecord;
+      if (parentLessonId) {
+        finalLessonStatus = await checkAndCompleteLesson(userId, courseId, parentLessonId);
+      }
+
+      const updatedRecord = await globalTrackingRepository.findOne( userId, trackableType, trackableId );
+      if (trackableType === 'lesson') {
+         return {
+            updatedItem: updatedRecord,
+            parentLessonStatus: finalLessonStatus,
+            parentLessonId: parentLessonId
+         };
+      }
+      return { 
+          updatedItem: updatedRecord, 
+          parentLessonStatus: (parentLessonId && itemTypes.includes(trackableType)) ? finalLessonStatus : null,
+          parentLessonId: (parentLessonId && itemTypes.includes(trackableType)) ? parentLessonId : null
+      };
     } catch ( error ) {
       handleServiceError( error, "Update Progress" );
       throw error;

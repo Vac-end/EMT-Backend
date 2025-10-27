@@ -2,7 +2,6 @@ import { handleServiceError } from '@utils/helpers';
 import { courseRepository } from './course.repositories';
 import { Announcement, CourseCreationAttributes, Enrollment, GlobalTracking } from '@interfaces/models';
 import { StudentDashboardCourse } from './model/student-dashboard-course';
-import { globalTrackingService } from '@features/GlobalTracking/globaltracking.service';
 import { Op } from 'sequelize';
 
 export const courseService = {
@@ -72,53 +71,93 @@ export const courseService = {
       if ( !enrollment ) {
         throw new Error( 'Forbidden: User is not enrolled in this course.' );
       }
+      const currentUserEnrollmentRecord = await Enrollment.findOne( {
+        where: { courseId, userId },
+        attributes: [ 'id', 'userId', 'role', 'groupId' ]
+      } );
+      if ( !currentUserEnrollmentRecord ) {
+        throw new Error( 'Forbidden: User is not enrolled in this course.' );
+      }
       const courseWithDetails = await courseRepository.findByPkIncludingDetails( courseId );
       if ( !courseWithDetails ) {
         throw new Error( 'Course not found.' );
       }
       const courseData = courseWithDetails.get( { plain: true } ) as any;
-      const userProgressRecords = await globalTrackingService.getUserProgressInCourse( userId, courseId, 'lesson' );
-      const progressMap = new Map( userProgressRecords.map( p => [ p.trackableId, p.status ] ) );
+      const currentUserEnrollmentArray = currentUserEnrollmentRecord.get({ plain: true });
+      const allProgressRecords = await GlobalTracking.findAll( {
+        where: {
+          userId: userId,
+          courseId: courseId,
+          trackableType: { [ Op.in ]: [ 'lesson', 'course_content' ] }
+        },
+        attributes: [ 'trackableId', 'status', 'trackableType' ]
+      } );
+      const lessonProgressMap = new Map<string, string>();
+      const contentProgressMap = new Map<string, string>();
+
+      allProgressRecords.forEach( p => {
+        if ( p.trackableType === 'lesson' ) {
+          lessonProgressMap.set( p.trackableId, p.status );
+        } else if ( p.trackableType === 'course_content' ) {
+          contentProgressMap.set( p.trackableId, p.status );
+        }
+      } );
       let totalCourseLessons = 0;
       let completedCourseLessons = 0;
-      const assignmentsList: { id: string, tittle: string; }[] = [];
-      const quizzesList: { id: string, tittle: string; }[] = [];
-      if ( courseData.CourseModulesList ) {
-        for ( const module of courseData.CourseModulesList ) {
-          let completedModuleLessons = 0;
-          if ( module.ModuleLessonsList ) {
-            totalCourseLessons += module.ModuleLessonsList.length;
-            for ( const lesson of module.ModuleLessonsList ) {
-              lesson.userProgressStatus = progressMap.get( lesson.id ) || 'not_started';
-              if ( lesson.userProgressStatus === 'completed' ) {
-                completedModuleLessons++;
-                completedCourseLessons++;
-              }
-              if ( lesson.LessonSchedules && lesson.LessonSchedules.length > 0 ) {
-                lesson.schedule = lesson.LessonSchedules[ 0 ];
-              }
-              delete lesson.LessonSchedules;
-              if ( lesson.LessonCourseContentList && lesson.LessonCourseContentList.length > 0 ) {
-                lesson.courseContents = lesson.LessonCourseContentList;
-              }
-              delete lesson.LessonCourseContentList;
-              if ( lesson.LessonAssignments && lesson.LessonAssignments.length > 0 ) {
-                assignmentsList.push( ...lesson.LessonAssignments );
-              }
-              if ( lesson.LessonQuizzes && lesson.LessonQuizzes.length > 0 ) {
-                quizzesList.push( ...lesson.LessonQuizzes );
-              }
-              delete lesson.LessonAssignments;
-              delete lesson.LessonQuizzes;
-            }
-            module.totalLessons = module.ModuleLessonsList.length;
-            module.completedLessons = completedModuleLessons;
-          } else {
-            module.totalLessons = 0;
-            module.completedLessons = 0;
+      const assignmentsList: { id: string, tittle: string, lessonId: string; }[] = [];
+      const quizzesList: { id: string, tittle: string, lessonId: string; }[] = [];
+      const processedModules = courseData.CourseModulesList?.map( ( module: any ) => {
+        let completedModuleLessons = 0;
+        const processedLessons = module.ModuleLessonsList?.map( ( lesson: any ) => {
+          totalCourseLessons++;
+          const userProgressStatus = lessonProgressMap.get( lesson.id ) || 'not_started';
+          if ( userProgressStatus === 'completed' ) {
+            completedModuleLessons++;
+            completedCourseLessons++;
           }
-        }
-      }
+          if ( lesson.LessonAssignments ) {
+            assignmentsList.push( ...lesson.LessonAssignments.map( ( a: any ) => ( {
+              id: a.id,
+              tittle: a.tittle,
+              lessonId: lesson.id
+            } ) ) );
+          }
+          if ( lesson.LessonQuizzes ) {
+            quizzesList.push( ...lesson.LessonQuizzes.map( ( q: any ) => ( {
+              id: q.id,
+              tittle: q.tittle,
+              lessonId: lesson.id
+            } ) ) );
+          }
+          const processedCourseContents = ( lesson.LessonCourseContentList || [] ).map( ( contentItem: any ) => {
+            const contentStatus = contentProgressMap.get( contentItem.id ) || 'not_started';
+            return {
+              ...contentItem,
+              userProgressStatus: contentStatus
+            };
+          } );
+          return {
+            id: lesson.id,
+            tittle: lesson.tittle,
+            description: lesson.description,
+            orderIndex: lesson.orderIndex,
+            duration: lesson.duration,
+            schedule: lesson.LessonSchedules?.[ 0 ] || null,
+            courseContents: processedCourseContents,
+            userProgressStatus: userProgressStatus,
+          };
+        } ) || [];
+        return {
+          id: module.id,
+          tittle: module.tittle,
+          description: module.description,
+          orderIndex: module.orderIndex,
+          lessons: processedLessons,
+          totalLessons: processedLessons.length,
+          completedLessons: completedModuleLessons,
+        };
+      } ) || [];
+
       const overallCompletionPercentage = totalCourseLessons > 0
         ? Math.round( ( completedCourseLessons / totalCourseLessons ) * 100 )
         : 0;
@@ -126,11 +165,7 @@ export const courseService = {
       let readAnnouncementIds = new Set<string>();
       if ( announcementIds.length > 0 ) {
         const readRecords = await GlobalTracking.findAll( {
-          where: {
-            userId: userId,
-            trackableType: 'announcement',
-            trackableId: { [ Op.in ]: announcementIds }
-          },
+          where: { userId: userId, trackableType: 'announcement', trackableId: { [ Op.in ]: announcementIds } },
           attributes: [ 'trackableId' ]
         } );
         readAnnouncementIds = new Set( readRecords.map( r => r.trackableId ) );
@@ -145,8 +180,8 @@ export const courseService = {
           groupsEnabled: courseData.groupsEnabled,
           academicLevelName: courseData.CourseAcademicLevel?.name ?? null
         },
-        modules: courseData.CourseModulesList || [],
-        professors: courseData.CourseEnrolledUsers?.map( ( e: any ) => e.EnrolledUser ) || [],
+        modules: processedModules,
+        professors: courseData.CourseEnrolledUsers?.map( ( e: any ) => e.EnrolledUser ).filter( Boolean ) || [],
         announcements: {
           latest: courseData.CourseAnnouncements?.map( ( a: any ) => ( {
             id: a.id, title: a.title, content: a.content, imageUrl: a.imageUrl, createdAt: a.createdAt,
@@ -158,7 +193,8 @@ export const courseService = {
           assignments: uniqueAssignments,
           quizzes: uniqueQuizzes
         },
-        overallCompletionPercentage: overallCompletionPercentage
+        overallCompletionPercentage: overallCompletionPercentage,
+        currentUserEnrollment: currentUserEnrollmentArray ?? null,
       };
       return response;
     } catch ( error ) {
