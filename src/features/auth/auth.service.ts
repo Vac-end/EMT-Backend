@@ -145,7 +145,19 @@ export const authService = {
       if ( !user ) {
         throw new Error( 'User not found' );
       }
-      return generateAccessToken(user);
+      const newAccessToken = generateAccessToken(user);
+      const newRefreshToken = generateRefreshToken(user);
+      await authRepository.deleteByToken(token);
+      await authRepository.create({
+        token: newRefreshToken,
+        userId: user.id,
+        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 días
+        type: 'refreshToken',
+      });
+      return {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      };
     } catch ( error ) {
       handleServiceError( error, 'Refresh Token' );
       throw error;

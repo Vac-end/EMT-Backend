@@ -77,10 +77,23 @@ export const authController = {
         return res.status( 401 ).json( { message: 'No refresh token provided' } );
       }
 
-      const accessToken = await authService.refresh( token );
-      return res.status( 200 ).json( { accessToken } );
+      const { accessToken, refreshToken } = await authService.refresh(token);
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: envConfig.NODE_ENV === 'production',
+        sameSite: 'strict',
+        path: '/api/auth',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+      });
+      return res.status(200).json({ accessToken });
     } catch ( error ) {
       handleServiceError( error, 'Refresh' );
+      res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        path: '/api/auth',
+      });
       return res.status( 401 ).json( { message: 'Invalid or expired refresh token' } );
     }
   },

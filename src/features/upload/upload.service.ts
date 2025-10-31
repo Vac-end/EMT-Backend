@@ -1,6 +1,7 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { envConfig } from '@config/env.config';
+import { mapMimeTypeToSimpleType } from '@utils/helpers';
 import { logger } from '@utils/logger';
 import { v4 as uuidv4 } from 'uuid';
 const r2Config = {
@@ -14,38 +15,63 @@ const r2Config = {
 };
 
 const s3Client = new S3Client(r2Config);
+export interface UploadedFileResponse {
+  fileUrl: string;
+  fileName: string;
+  fileKey: string;
+  fileType: ReturnType<typeof mapMimeTypeToSimpleType>;
+  fileSize: number;
+}
 
 export const uploadService = {
-  uploadPublic: async (files: Express.Multer.File[], destination: string): Promise<string[]> => {
+  uploadPublic: async (files: Express.Multer.File[], destination: string): Promise<UploadedFileResponse[]> => {
     try {
-      console.log('Files in service:', files);
-      const sanitizedDestination = destination.replace(/[^a-zA-Z0-9-_/]/g, '');
-      const urls = await Promise.all(files.map(async (file) => {
-        console.log('Processing file:', file.originalname);
-        if (!file.buffer) throw new Error('File buffer is missing');
-        const finalFileName = `${uuidv4()}-${file.originalname}`;
-        const key = `${sanitizedDestination}/${finalFileName}`;
+      const sanitizedDestination = destination.replace( /[^a-zA-Z0-9-_/]/g, '' );
+      const responses = await Promise.all( files.map( async ( file ) => {
+        if ( !file.buffer ) throw new Error( 'File buffer is missing' );
+        const finalFileName = `${ uuidv4() }-${ file.originalname }`;
+        const key = `${ sanitizedDestination }/${ finalFileName }`;
         const uploadParams = {
           Bucket: envConfig.PUBLIC_BUCKET_NAME,
           Key: key,
           Body: file.buffer,
           ContentType: file.mimetype,
+          ContentDisposition: 'inline'
         };
-        console.log('Upload params:', uploadParams);
-        const command = new PutObjectCommand(uploadParams);
-        await s3Client.send(command);
-
-        const url = `https://${envConfig.DOMAIN}/${envConfig.PUBLIC_BUCKET_NAME}/${key}`;
-        console.log('Generated URL:', url);
-        return url;
-      }));
-      return urls;
+        const command = new PutObjectCommand( uploadParams );
+        await s3Client.send( command );
+        const url = `https://${ envConfig.DOMAIN }/${ key }`;
+        return {
+          fileUrl: url,
+          fileName: file.originalname,
+          fileKey: key,
+          fileType: mapMimeTypeToSimpleType( file.mimetype ),
+          fileSize: file.size
+        };
+      } ) );
+      return responses;
     } catch (error) {
       console.error('Service error:', error);
       logger.error('Error uploading to public bucket:', error);
       throw new Error('Failed to upload to public bucket');
     }
   },
+
+  deletePublicByKey: async (key: string): Promise<void> => {
+    try {
+      const deleteParams = {
+        Bucket: envConfig.PUBLIC_BUCKET_NAME,
+        Key: key,
+      };
+      const command = new DeleteObjectCommand(deleteParams);
+      await s3Client.send(command);
+      logger.info(`File deleted from public bucket: ${key}`);
+    } catch (error) {
+      logger.error('Error deleting from public bucket:', error);
+      throw new Error('Failed to delete from public bucket');
+    }
+  },
+  
   deletePublic: async (destination: string, fileName: string): Promise<void> => {
     try {
       const sanitizedDestination = destination.replace(/[^a-zA-Z0-9-_/]/g, '');

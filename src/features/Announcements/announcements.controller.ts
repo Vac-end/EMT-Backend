@@ -4,19 +4,23 @@ import { announcementService } from './announcements.service';
 import { AnnouncementCreationAttributes } from './model/announcements.model';
 
 export const AnnouncementController = {
-  getByCourseId: async ( req: Request, res: Response ) => {
+  getByCourseIdPaginated: async (req: Request, res: Response) => {
     try {
       const { courseId } = req.params;
-      const page = parseInt( req.query.page as string, 10 ) || 1;
-      const limit = parseInt( req.query.limit as string, 10 ) || 10;
-
-      if ( !courseId ) return res.status( 400 ).json( { message: 'Course ID is required' } );
-
-      const announcements = await announcementService.getByCourseId( courseId, page, limit );
-      return res.status( 200 ).json( announcements );
-    } catch ( error: any ) {
-      handleServiceError( error, 'Get Announcements by Course ID' );
-      return res.status( error.message === 'Course not found' ? 404 : 500 ).json( { message: error.message || 'Failed to fetch announcements' } );
+      const userId = (req as any).user?.sub;
+      const page = parseInt(req.query.page as string, 10) || 1;
+      const limit = parseInt(req.query.limit as string, 10) || 10;
+      if (!courseId) {
+        return res.status(400).json({ message: 'Course ID is required.' });
+      }
+      if (!userId) {
+        return res.status(401).json({ message: 'User not authenticated.' });
+      }
+      const result = await announcementService.getByCourseId(courseId, userId, page, limit);
+      return res.status(200).json(result);
+    } catch (error) {
+      handleServiceError(error, 'Get Paginated Announcements by Course');
+      return res.status(500).json({ message: 'Failed to fetch announcements.' });
     }
   },
 

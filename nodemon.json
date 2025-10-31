@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json.schemastore.org/nodemon.json",
+  "watch": ["src"],
+  "ext": "ts,json",
+  "ignore": [
+    "*.log",
+    "logs/**",
+    "dist/**",
+    "node_modules/**"
+  ],
+  "exec": "tsx -r tsconfig-paths/register --inspect src/server.ts"
+}

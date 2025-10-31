@@ -1,11 +1,10 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import { sequelize } from '@config/db.config';
-
-export type CourseContentType = 'video' | 'pdf' | 'text' | 'html' | 'link' | 'image' | 'xlsx' | 'other';
+import { CONTENT_TYPE_VALUES, ContentType } from '@utils/types';
 export interface CourseContentAttributes {
   id: string;
   lessonId: string;
-  type: CourseContentType;
+  type: ContentType;
   orderIndex: number;
   contentUrl?: string;
   contentBody?: string;
@@ -19,7 +18,7 @@ export interface CourseContentCreationAttributes extends Optional<CourseContentA
 export class CourseContent extends Model<CourseContentAttributes, CourseContentCreationAttributes> implements CourseContentAttributes {
   declare id: string;
   declare lessonId: string;
-  declare type: CourseContentType;
+  declare type: ContentType;
   declare orderIndex: number;
   declare contentUrl?: string;
   declare contentBody?: string;
@@ -31,7 +30,7 @@ export class CourseContent extends Model<CourseContentAttributes, CourseContentC
 CourseContent.init( {
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true, allowNull: false },
   lessonId: { type: DataTypes.UUID, allowNull: false, references: { model: 'Lesson', key: 'id' } },
-  type: { type: DataTypes.ENUM( 'video', 'pdf', 'text', 'html', 'link', 'image', 'xlsx', 'other' ), allowNull: false, defaultValue: 'other' },
+  type: { type: DataTypes.ENUM( ...CONTENT_TYPE_VALUES ), allowNull: false, defaultValue: 'other' },
   orderIndex: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
   contentBody: { type: DataTypes.TEXT, allowNull: true },
   contentUrl: { type: DataTypes.STRING, allowNull: true },

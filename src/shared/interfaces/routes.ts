@@ -16,12 +16,16 @@ import assignmentRoutes from '@features/Assignment/assignment.routes'
 import submissionRoutes from '@features/Submission/submission.routes'
 import trackRoutes from '@features/GlobalTracking/globaltracking.routes'
 import groupRoutes from '@features/Group/group.routes'
+import announcementRoutes from '@features/Announcements/announcements.routes'
+import uploadRoutes from '@features/upload/upload.routes'
 
 const router = Router();
 
+router.use('/upload', uploadRoutes);
 router.use('/auth', authRoutes);
 router.use('/academicLevel', academicLevelRoutes);
 router.use('/users', userRoutes);
+router.use('/announcements', announcementRoutes);
 router.use('/courses', courseRoutes);
 router.use('/modules', moduleRoutes);
 router.use('/lessons', lessonRoutes);

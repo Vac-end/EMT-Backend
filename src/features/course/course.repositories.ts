@@ -143,4 +143,90 @@ export const courseRepository = {
 
   delete: ( id: string ) =>
     Course.destroy( { where: { id } } ),
+
+  findDetailsById: ( courseId: string ) =>
+    Course.findByPk( courseId, {
+      attributes: [ 'id', 'tittle', 'description', 'groupsEnabled', 'academicLevelId' ],
+      include: [
+        {
+          model: AcademicLevel,
+          as: 'CourseAcademicLevel',
+          attributes: [ 'name' ],
+          required: false
+        },
+        {
+          model: Enrollment,
+          as: 'CourseEnrolledUsers',
+          where: { role: 'docente' },
+          attributes: [ 'userId' ],
+          required: false,
+          include: [
+            {
+              model: User,
+              as: 'EnrolledUser',
+              attributes: [ 'id', 'name', 'email', 'imagePerfilUrl' ]
+            }
+          ]
+        },
+        {
+          model: Announcement,
+          as: 'CourseAnnouncements',
+          attributes: [ 'id' ],
+          required: false,
+          separate: true,
+        },
+      ],
+    } ),
+
+  findContentStructureById: ( courseId: string ) =>
+    Course.findByPk( courseId, {
+      attributes: [ 'id' ],
+      include: [
+        {
+          model: Module,
+          as: 'CourseModulesList',
+          attributes: [ 'id', 'tittle', 'description', 'orderIndex' ],
+          separate: true,
+          order: [ [ 'orderIndex', 'ASC' ] ],
+          include: [
+            {
+              model: Lesson,
+              as: 'ModuleLessonsList',
+              attributes: [ 'id', 'tittle', 'description', 'duration', 'orderIndex' ],
+              separate: true,
+              order: [ [ 'orderIndex', 'ASC' ] ],
+              include: [
+                {
+                  model: Schedule,
+                  as: 'LessonSchedules',
+                  attributes: [ 'startTime', 'endTime', 'meetingLink', 'mode' ],
+                  required: false,
+                  limit: 1
+                },
+                {
+                  model: Assignment,
+                  as: 'LessonAssignments',
+                  attributes: [ 'id', 'tittle' ],
+                  required: false
+                },
+                {
+                  model: Quiz,
+                  as: 'LessonQuizzes',
+                  attributes: [ 'id', 'tittle' ],
+                  required: false
+                },
+                {
+                  model: CourseContent,
+                  as: 'LessonCourseContentList',
+                  attributes: [ 'id', 'type', 'contentUrl', 'contentBody', 'description', 'orderIndex' ],
+                  required: false,
+                  separate: true,
+                  order: [ [ 'orderIndex', 'ASC' ] ]
+                }
+              ]
+            }
+          ]
+        },
+      ],
+    } ),
 };

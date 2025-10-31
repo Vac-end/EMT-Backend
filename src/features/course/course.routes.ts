@@ -9,6 +9,8 @@ const router = Router();
 
 router.get( '/admin-dashboard', authMiddleware, roleMiddleware( [ 'administrador' ] ), CourseController.getAdminDashboard );
 router.get( '/:courseId/details', authMiddleware, CourseController.getDetails);
+router.get( '/:courseId/content', authMiddleware, CourseController.getCourseContent );
+router.get( '/:courseId/gradebook', authMiddleware, CourseController.getGradebook );
 router.get( '/', authMiddleware, roleMiddleware( [ 'administrador' ] ), CourseController.getAll );
 router.get( '/:id', authMiddleware, CourseController.getById );
 router.get( '/CreatedBy/:createdBy', authMiddleware, CourseController.getByCreatedId );

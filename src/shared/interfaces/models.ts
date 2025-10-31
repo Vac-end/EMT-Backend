@@ -19,6 +19,7 @@ import { GlobalTracking } from '@features/GlobalTracking/model/globaltracking.mo
 import { GlobalTrackingCreationAttributes, GlobalTrackingAttributes } from '../../features/GlobalTracking/model/globaltracking.model';
 import { GroupCreationAttributes, Group, GroupAttributes } from '../../features/Group/model/model.models';
 import { EnrollmentAttributes } from '../../features/Enrollment/model/enrollment.model';
+import { File } from '@features/Submission/model/File.model';
 
 User.hasMany( Token, { foreignKey: 'userId', as: 'UserToken' } );
 Token.belongsTo( User, { foreignKey: 'userId', as: 'TokenOwner' } );
@@ -74,11 +75,11 @@ Assignment.belongsTo( Lesson, { foreignKey: 'lessonId', as: 'AssignmentLesson' }
 Enrollment.hasMany( Submission, { foreignKey: 'enrollmentId', as: 'EnrollmentSubmissions' } );
 Submission.belongsTo( Enrollment, { foreignKey: 'enrollmentId', as: 'SubmissionEnrollment' } );
 
-Assignment.hasMany( Submission, { foreignKey: 'assignmentId', as: 'AssignmentSubmissions' });
-Submission.belongsTo( Assignment, { foreignKey: 'assignmentId', as: 'SubmissionAssignment' });
+Assignment.hasMany( Submission, { foreignKey: 'assignmentId', as: 'AssignmentSubmissions' } );
+Submission.belongsTo( Assignment, { foreignKey: 'assignmentId', as: 'SubmissionAssignment' } );
 
-Quiz.hasMany( Submission, { foreignKey: 'quizId', as: 'QuizSubmissions' });
-Submission.belongsTo( Quiz, { foreignKey: 'quizId', as: 'SubmissionQuiz' });
+Quiz.hasMany( Submission, { foreignKey: 'quizId', as: 'QuizSubmissions' } );
+Submission.belongsTo( Quiz, { foreignKey: 'quizId', as: 'SubmissionQuiz' } );
 
 Announcement.belongsTo( Course, { foreignKey: 'courseId', as: 'AnnouncementCourse' } );
 Course.hasMany( Announcement, { foreignKey: 'courseId', as: 'CourseAnnouncements' } );
@@ -92,13 +93,22 @@ User.hasMany( GlobalTracking, { foreignKey: 'userId', as: 'UserTrackingRecords' 
 GlobalTracking.belongsTo( Course, { foreignKey: 'courseId', as: 'TrackingCourse' } );
 Course.hasMany( GlobalTracking, { foreignKey: 'courseId', as: 'CourseTrackingRecords' } );
 
-Group.belongsTo(Course, { foreignKey: 'courseId', as: 'GroupCourse' });
-Course.hasMany(Group, { foreignKey: 'courseId', as: 'CourseGroups' });
+Group.belongsTo( Course, { foreignKey: 'courseId', as: 'GroupCourse' } );
+Course.hasMany( Group, { foreignKey: 'courseId', as: 'CourseGroups' } );
 
-Enrollment.belongsTo(Group, { foreignKey: 'groupId', as: 'EnrollmentGroup' });
-Group.hasMany(Enrollment, { foreignKey: 'groupId', as: 'GroupMembers' });
+Enrollment.belongsTo( Group, { foreignKey: 'groupId', as: 'EnrollmentGroup' } );
+Group.hasMany( Enrollment, { foreignKey: 'groupId', as: 'GroupMembers' } );
+
+Submission.belongsTo( Group, { foreignKey: 'groupId', as: 'SubmissionGroup' } );
+Group.hasMany( Submission, { foreignKey: 'groupId', as: 'GroupSubmissions' } );
+
+File.belongsTo( Assignment, { foreignKey: 'resourceId', constraints: false, as: 'assignment', } );
+Assignment.hasMany( File, { foreignKey: 'resourceId', constraints: false, as: 'files', scope: { resourceType: 'assignment' } } );
+
+File.belongsTo( Submission, { foreignKey: 'resourceId', constraints: false, as: 'submission', } );
+Submission.hasMany( File, { foreignKey: 'resourceId', constraints: false, as: 'files', scope: { resourceType: 'submission' } } );
 
 export {
   sequelize, User, Token, AcademicLevel, Course, Module, Lesson, CourseContent, Enrollment, Attendance, Schedule, Quiz, Question, QuestionOpt, Assignment, Submission, CourseCreationAttributes, AcademicLevelCreationAttributes, EnrollmentCreationAttributes, UserCreationAttributes, Announcement, GlobalTracking,
-  GlobalTrackingCreationAttributes, GlobalTrackingAttributes, Group, GroupCreationAttributes, GroupAttributes, EnrollmentAttributes
+  GlobalTrackingCreationAttributes, GlobalTrackingAttributes, Group, GroupCreationAttributes, GroupAttributes, EnrollmentAttributes, File
 };

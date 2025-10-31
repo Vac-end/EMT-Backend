@@ -7,7 +7,7 @@ import { announcementSchema } from './model/announcements.validation';
 
 const router = Router();
 
-router.get( '/course/:courseId', authMiddleware, AnnouncementController.getByCourseId );
+router.get( '/course/:courseId', authMiddleware, AnnouncementController.getByCourseIdPaginated );
 router.get( '/:id', authMiddleware, AnnouncementController.getById );
 router.post( '/', authMiddleware, roleMiddleware( [ 'docente', 'administrador' ] ), validate( announcementSchema ), AnnouncementController.create );
 router.put( '/:id', authMiddleware, roleMiddleware( [ 'docente', 'administrador' ] ), validate( announcementSchema.partial() ), AnnouncementController.update );

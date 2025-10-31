@@ -8,7 +8,8 @@ export interface AssignmentAttributes{
   description: string;
   dueDate: Date;
   maxScore: number;
-  fileUrl?: string;
+  isGroupAssignment?: boolean;
+  maxAttempts?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -22,7 +23,8 @@ export class Assignment extends Model<AssignmentAttributes, AssignmentCreationAt
   declare description: string;
   declare dueDate: Date;
   declare maxScore: number;
-  declare fileUrl?: string;
+  declare isGroupAssignment?: boolean;
+  declare maxAttempts?: number;
   declare readonly  createdAt?: Date;
   declare readonly  updatedAt?: Date;
 }
@@ -34,7 +36,8 @@ Assignment.init({
   description: { type: DataTypes.STRING, allowNull: false },
   dueDate: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   maxScore: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 100},
-  fileUrl: { type: DataTypes.STRING, allowNull: false },
+  isGroupAssignment: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false},
+  maxAttempts: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 1 },
   createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
 },{ sequelize, modelName: 'Assignment', timestamps: true})

@@ -56,6 +56,24 @@ export const CourseController = {
     }
   },
 
+  getCourseContent: async ( req: Request, res: Response ) => {
+    try {
+      const { courseId } = req.params;
+      const userId = ( req as any ).user?.sub;
+      if ( !courseId ) {
+        return res.status( 400 ).json( { message: 'Course ID is required.' } );
+      }
+      if ( !userId ) {
+        return res.status( 401 ).json( { message: 'User not authenticated.' } );
+      }
+      const courseContent = await courseService.getCourseContent( courseId, userId );
+      return res.status( 200 ).json( courseContent );
+    } catch ( error ) {
+      handleServiceError( error, 'Get Course Content' );
+      return res.status( 500 ).json( { message: 'Failed to fetch course content.' } );
+    }
+  },
+
   getByCreatedId: async ( req: Request, res: Response ) => {
     try {
       const { createdBy } = req.params;
@@ -114,4 +132,25 @@ export const CourseController = {
       return res.status( 500 ).json( { message: 'Failed to delete Course' } );
     }
   },
+
+  getGradebook: async (req: Request, res: Response) => {
+    try {
+      const { courseId } = req.params;
+      const userId = (req as any).user?.sub;
+      const page = parseInt(req.query.page as string, 10) || 1;
+      const limit = parseInt(req.query.limit as string, 10) || 15;
+      if (!courseId) {
+        return res.status(400).json({ message: 'Course ID is required.' });
+      }
+      if (!userId) {
+        return res.status(401).json({ message: 'User not authenticated.' });
+      }
+      const gradebookData = await courseService.getGradebookForStudent(courseId, userId, page, limit);
+      return res.status(200).json(gradebookData);
+    } catch (error) {
+      handleServiceError(error, 'Get Course Gradebook');
+      return res.status(500).json({ message: 'Failed to fetch course gradebook.' });
+    }
+  },
+  
 };
